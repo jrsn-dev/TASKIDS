@@ -1,0 +1,6 @@
+{
+  "name": "Kids Task Manager",
+  "description": "Kids Task Manager Android TV app with task timers, progress tracking, and parent-controlled YouTube rewards.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
