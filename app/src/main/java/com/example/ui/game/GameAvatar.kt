@@ -24,7 +24,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.asImageBitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.unit.dp
-import com.example.R
 import com.example.model.Child
 
 /**
@@ -51,14 +50,18 @@ fun GameAvatar(
         label = "avatar-bob"
     )
 
-    val avatarRes = when (child.avatarCharacter.uppercase()) {
-        "GIRL" -> R.drawable.avatar_girl_base
-        else -> R.drawable.avatar_boy_base
+    val avatarAsset = when (child.avatarCharacter.uppercase()) {
+        "GIRL" -> "avatar_girl_base.png"
+        else -> "avatar_boy_base.png"
     }
 
-    val resources = LocalContext.current.resources
-    val avatarBitmap = remember(avatarRes) {
-        BitmapFactory.decodeResource(resources, avatarRes)?.asImageBitmap()
+    val context = LocalContext.current
+    val avatarBitmap = remember(avatarAsset) {
+        runCatching {
+            context.assets.open(avatarAsset).use { stream ->
+                BitmapFactory.decodeStream(stream)?.asImageBitmap()
+            }
+        }.getOrNull()
     }
 
     Box(
