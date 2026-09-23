@@ -27,6 +27,8 @@ import com.example.ui.components.PrimaryTvButton
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.dialogs.AddTaskDialog
 import com.example.ui.game.GameAvatar
+import com.example.ui.game.GameIcon
+import com.example.ui.game.RewardVectorIcon
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
@@ -345,7 +347,14 @@ private fun OverviewSection(
                                 .padding(12.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(task.icon, fontSize = 22.sp)
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .background(TaskIdsColors.SoftBlue, RoundedCornerShape(10.dp)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                GameIcon(task.iconKey, Modifier.size(24.dp), TaskIdsColors.Blue)
+                            }
                             Spacer(Modifier.width(10.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(task.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Bold)
@@ -415,7 +424,14 @@ private fun TasksSection(
                         .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(task.icon, fontSize = 25.sp)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(TaskIdsColors.SoftBlue, RoundedCornerShape(11.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GameIcon(task.iconKey, Modifier.size(27.dp), TaskIdsColors.Blue)
+                    }
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
                         Text(task.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
@@ -550,7 +566,14 @@ private fun RewardsParentSection(rewards: List<Reward>, onAdd: () -> Unit) {
                         .padding(13.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(reward.icon, fontSize = 27.sp)
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(TaskIdsColors.SoftBlue, RoundedCornerShape(11.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        RewardVectorIcon(reward.type, Modifier.size(26.dp), TaskIdsColors.Blue)
+                    }
                     Spacer(Modifier.width(10.dp))
                     Column(Modifier.weight(1f)) {
                         Text(reward.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
