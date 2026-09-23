@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.components.PrimaryTvButton
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.game.RewardVectorIcon
 import com.example.viewmodel.MainViewModel
 
 @Composable
@@ -42,7 +43,11 @@ fun ScreenTimeScreen(viewModel: MainViewModel) {
                         .background(TaskIdsColors.SoftBlue, CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("📺", fontSize = 26.sp)
+                    RewardVectorIcon(
+                        type = "SCREEN_TIME",
+                        modifier = Modifier.size(28.dp),
+                        tint = TaskIdsColors.Blue
+                    )
                 }
                 Spacer(Modifier.width(12.dp))
                 Column {
@@ -101,7 +106,7 @@ fun ScreenTimeScreen(viewModel: MainViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "🎬 Aqui entram apenas vídeos, apps ou experiências previamente aprovados na Área dos Pais. O navegador aberto foi removido da experiência infantil.",
+                    "Aqui entram apenas vídeos, apps ou experiências previamente aprovados na Área dos Pais. O navegador aberto foi removido da experiência infantil.",
                     color = TaskIdsColors.Ink,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
