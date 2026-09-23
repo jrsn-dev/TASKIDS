@@ -10,7 +10,6 @@ import com.example.data.local.TaskDatabase
 import com.example.data.preferences.AppPreferencesRepository
 import com.example.data.repository.TaskRepository
 import com.example.game.GameEngine
-import com.example.game.MissionReward
 import com.example.model.Achievement
 import com.example.model.Child
 import com.example.model.DefaultProfiles
@@ -188,7 +187,9 @@ class MainViewModel(
 
     fun selectTask(task: Task) {
         navigateTo(AppScreen.Timer(task.id))
-        startTimer(task)
+        if (timerState.value.taskId != task.id || timerState.value.remainingSeconds <= 0) {
+            startTimer(task)
+        }
     }
 
     fun addTask(
