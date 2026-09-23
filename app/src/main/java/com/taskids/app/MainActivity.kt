@@ -2,8 +2,8 @@ package com.taskids.app
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.setContent
 import androidx.activity.viewModels
 import com.taskids.app.ui.TaskidsApp
 import com.taskids.app.ui.theme.TaskidsTheme

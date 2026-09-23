@@ -9,7 +9,8 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.taskids.app"
+        // Retained from v1 so installed copies can upgrade in place and run Room migration 1 -> 2.
+        applicationId = "com.aistudio.kidstasks.pqwxzt"
         minSdk = 24
         targetSdk = 36
         versionCode = 2
