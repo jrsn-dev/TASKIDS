@@ -25,7 +25,7 @@ import com.example.model.TaskExecution
         Routine::class,
         RoutineTask::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -138,6 +138,25 @@ abstract class TaskDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE children ADD COLUMN totalXp INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN currentCombo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN bestCombo INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN avatarSkinTone INTEGER NOT NULL DEFAULT 2")
+                db.execSQL("ALTER TABLE children ADD COLUMN avatarHairStyle INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN avatarHairColor INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN avatarOutfitColor INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE children ADD COLUMN gameTheme TEXT NOT NULL DEFAULT 'SKY'")
+
+                db.execSQL("ALTER TABLE tasks ADD COLUMN iconKey TEXT NOT NULL DEFAULT 'GENERIC'")
+                db.execSQL("ALTER TABLE tasks ADD COLUMN rewardXp INTEGER NOT NULL DEFAULT 100")
+
+                db.execSQL("ALTER TABLE task_executions ADD COLUMN earnedXp INTEGER NOT NULL DEFAULT 0")
+                db.execSQL("ALTER TABLE task_executions ADD COLUMN combo INTEGER NOT NULL DEFAULT 1")
+            }
+        }
+
         fun getDatabase(context: Context): TaskDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -145,7 +164,7 @@ abstract class TaskDatabase : RoomDatabase() {
                     TaskDatabase::class.java,
                     "task_database"
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     .build()
                 INSTANCE = instance
                 instance
