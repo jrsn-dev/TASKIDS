@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.local.TaskDatabase
 import com.example.data.preferences.AppPreferencesRepository
 import com.example.data.repository.TaskRepository
+import com.example.model.Achievement
 import com.example.model.Child
 import com.example.model.DefaultProfiles
 import com.example.model.DefaultTasks
@@ -82,6 +83,41 @@ class MainViewModel(
     val routines: StateFlow<List<Routine>> = selectedChildId
         .flatMapLatest { repository.routinesForChild(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val achievements: StateFlow<List<Achievement>> = combine(currentChild, executions) { profile, history ->
+        val stars = profile?.totalStars ?: 0
+        val streak = profile?.currentStreak ?: 0
+        listOf(
+            Achievement(
+                id = "first_task",
+                title = "Primeira missão",
+                description = "Concluiu a primeira tarefa.",
+                icon = "🌟",
+                unlocked = history.isNotEmpty()
+            ),
+            Achievement(
+                id = "ten_tasks",
+                title = "Super consistente",
+                description = "Concluiu 10 tarefas.",
+                icon = "🏆",
+                unlocked = history.size >= 10
+            ),
+            Achievement(
+                id = "streak_3",
+                title = "Três dias seguidos",
+                description = "Manteve uma sequência de 3 dias.",
+                icon = "🔥",
+                unlocked = streak >= 3
+            ),
+            Achievement(
+                id = "stars_100",
+                title = "Colecionador(a) de estrelas",
+                description = "Alcançou 100 estrelas na jornada.",
+                icon = "⭐",
+                unlocked = stars >= 100
+            )
+        )
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val _soundEnabled = MutableStateFlow(prefs.soundEnabled)
     val soundEnabled: StateFlow<Boolean> = _soundEnabled.asStateFlow()
