@@ -25,6 +25,14 @@ try:
     root=ET.parse("/tmp/window.xml").getroot()
 except Exception:
     sys.exit(2)
+root_bounds=root.attrib.get("bounds","[0,0][1920,1080]")
+rm=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", root_bounds)
+if rm:
+    rx1,ry1,rx2,ry2=map(int,rm.groups())
+    cx,cy=(rx1+rx2)//2,(ry1+ry2)//2
+else:
+    cx,cy=960,540
+matches=[]
 for node in root.iter("node"):
     text=node.attrib.get("text","")
     desc=node.attrib.get("content-desc","")
@@ -33,8 +41,12 @@ for node in root.iter("node"):
         m=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", b)
         if m:
             x1,y1,x2,y2=map(int,m.groups())
-            print(f"{(x1+x2)//2} {(y1+y2)//2}")
-            sys.exit(0)
+            x,y=(x1+x2)//2,(y1+y2)//2
+            matches.append(((x-cx)**2+(y-cy)**2,x,y))
+if matches:
+    _,x,y=min(matches)
+    print(f"{x} {y}")
+    sys.exit(0)
 sys.exit(1)
 PY
 }
