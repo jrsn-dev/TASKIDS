@@ -87,3 +87,52 @@ Ambiente:
 - confirmar ausência de navegador/WebView;
 - confirmar ausência de permissão INTERNET;
 - confirmar que Back não encerra a área de tempo controlado diretamente.
+
+
+## Game Mode v3
+
+### Motor
+
+- XP 0 inicia no nível 1;
+- cada 500 XP aumenta o nível;
+- combo 3, 5, 7 e 10 aplica bônus;
+- combo não ultrapassa 10;
+- dia perfeito só dispara quando todas as missões ativas estão concluídas.
+
+### Avatar
+
+- trocar tom de pele;
+- trocar cabelo;
+- trocar cor do cabelo;
+- trocar roupa;
+- reiniciar app;
+- confirmar persistência.
+
+### Mundos
+
+Validar:
+
+- SKY;
+- SPACE;
+- FOREST;
+- ISLAND.
+
+Nenhum mundo deve depender de asset rasterizado.
+
+### Missões
+
+- primeira missão disponível;
+- próximas bloqueadas enquanto a anterior não for concluída;
+- missão concluída atualiza caminho;
+- voltar ao mapa não reinicia timer ativo;
+- reabrir missão ativa continua o mesmo timer.
+
+### Migration 2 -> 3
+
+- instalar v2;
+- criar perfil, tarefa e histórico;
+- atualizar para v3;
+- confirmar preservação;
+- confirmar defaults de XP/avatar/mundo;
+- concluir nova missão;
+- confirmar earnedXp e combo no histórico.
