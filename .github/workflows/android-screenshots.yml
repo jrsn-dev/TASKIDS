@@ -67,8 +67,17 @@ jobs:
                 print("NOT_FOUND", target)
                 subprocess.run(["adb","shell","uiautomator","dump","/sdcard/window.xml"])
                 sys.exit(2)
+            # Prefer the largest matching UI node. This avoids tapping small HUD text
+            # such as the star counter when looking for keypad digit "0".
+            def area(item):
+                b=item[2]
+                m=re.match(r"\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]", b)
+                if not m: return 0
+                x1,y1,x2,y2=map(int,m.groups())
+                return max(0,x2-x1)*max(0,y2-y1)
+            nodes.sort(key=area, reverse=True)
             x,y,*_=nodes[0]
-            print("TAP", target, x, y)
+            print("TAP", target, x, y, "bounds", nodes[0][2])
             subprocess.run(["adb","shell","input","tap",str(x),str(y)], check=True)
             time.sleep(1)
             PY
