@@ -26,6 +26,7 @@ import com.example.ui.components.MetricCard
 import com.example.ui.components.PrimaryTvButton
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.dialogs.AddTaskDialog
+import com.example.ui.game.GameAvatar
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
@@ -170,10 +171,13 @@ fun ParentDashboardScreen(viewModel: MainViewModel) {
                         onAdd = { showAddProfile = true }
                     )
                     ParentSection.SETTINGS -> SettingsSection(
+                        child = child,
                         soundEnabled = soundEnabled,
                         onToggleSound = { viewModel.setSoundEnabled(!soundEnabled) },
                         onUpdatePin = viewModel::updateParentalPin,
-                        onReset = viewModel::restartAllTasks
+                        onReset = viewModel::restartAllTasks,
+                        onUpdateAvatar = viewModel::updateAvatar,
+                        onSetTheme = viewModel::setGameTheme
                     )
                 }
             }
@@ -183,8 +187,19 @@ fun ParentDashboardScreen(viewModel: MainViewModel) {
     if (showAddTask) {
         AddTaskDialog(
             onDismiss = { showAddTask = false },
-            onConfirm = { title, duration, icon, description, stars, time, days, recurring ->
-                viewModel.addTask(title, duration, icon, description, stars, time, days, recurring)
+            onConfirm = { title, duration, iconKey, description, stars, xp, time, days, recurring ->
+                viewModel.addTask(
+                    title = title,
+                    durationMinutes = duration,
+                    icon = "",
+                    description = description,
+                    rewardStars = stars,
+                    rewardXp = xp,
+                    iconKey = iconKey,
+                    scheduledTime = time,
+                    recurrenceDays = days,
+                    isRecurring = recurring
+                )
                 showAddTask = false
             }
         )
@@ -260,7 +275,18 @@ private fun ParentHeader(child: Child?, onReports: () -> Unit) {
                 .padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(child?.avatarEmoji ?: "🧒", fontSize = 24.sp)
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .background(TaskIdsColors.SoftBlue, CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    child?.name?.take(1)?.uppercase() ?: "T",
+                    color = TaskIdsColors.Blue,
+                    fontWeight = FontWeight.Black
+                )
+            }
             Spacer(Modifier.width(8.dp))
             Column {
                 Text(
@@ -573,18 +599,21 @@ private fun ProfilesSection(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(76.dp)
+                            .size(96.dp)
                             .background(
                                 if (selected) TaskIdsColors.SoftBlue else TaskIdsColors.SoftBg,
                                 CircleShape
                             ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(profile.avatarEmoji, fontSize = 42.sp)
+                        GameAvatar(
+                            child = profile,
+                            modifier = Modifier.size(82.dp)
+                        )
                     }
                     Spacer(Modifier.height(10.dp))
                     Text(profile.name, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black, fontSize = 18.sp)
-                    Text("⭐ ${profile.totalStars}", color = TaskIdsColors.Muted, fontSize = 12.sp)
+                    Text("${profile.totalStars} estrelas • ${profile.totalXp} XP", color = TaskIdsColors.Muted, fontSize = 12.sp)
                     if (selected) {
                         Spacer(Modifier.height(8.dp))
                         Text("Perfil ativo", color = TaskIdsColors.Blue, fontWeight = FontWeight.Black, fontSize = 11.sp)
@@ -597,10 +626,13 @@ private fun ProfilesSection(
 
 @Composable
 private fun SettingsSection(
+    child: Child?,
     soundEnabled: Boolean,
     onToggleSound: () -> Unit,
     onUpdatePin: (String) -> Boolean,
-    onReset: () -> Unit
+    onReset: () -> Unit,
+    onUpdateAvatar: (Int, Int, Int, Int) -> Unit,
+    onSetTheme: (String) -> Unit
 ) {
     var pin by remember { mutableStateOf("") }
     var pinMessage by remember { mutableStateOf("") }
@@ -656,6 +688,94 @@ private fun SettingsSection(
                 if (pinMessage.isNotBlank()) {
                     Spacer(Modifier.height(6.dp))
                     Text(pinMessage, color = TaskIdsColors.Muted, fontSize = 11.sp)
+                }
+            }
+        }
+
+        Spacer(Modifier.height(14.dp))
+
+        if (child != null) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(24.dp))
+                    .padding(18.dp),
+                horizontalArrangement = Arrangement.spacedBy(18.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                GameAvatar(
+                    child = child,
+                    modifier = Modifier.size(130.dp)
+                )
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Avatar do jogo",
+                        color = TaskIdsColors.Ink,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        "Tudo é desenhado pelo próprio app, sem imagem externa.",
+                        color = TaskIdsColors.Muted,
+                        fontSize = 11.sp
+                    )
+                    Spacer(Modifier.height(10.dp))
+
+                    Text("Tom de pele", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        repeat(5) { option ->
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .background(
+                                        if (child.avatarSkinTone == option) TaskIdsColors.Blue else TaskIdsColors.SoftBg,
+                                        CircleShape
+                                    )
+                                    .clickable {
+                                        onUpdateAvatar(option, child.avatarHairStyle, child.avatarHairColor, child.avatarOutfitColor)
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    Text("Cabelo", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        repeat(4) { option ->
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        if (child.avatarHairStyle == option) TaskIdsColors.Blue else TaskIdsColors.SoftBg,
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable {
+                                        onUpdateAvatar(child.avatarSkinTone, option, child.avatarHairColor, child.avatarOutfitColor)
+                                    }
+                                    .padding(horizontal = 12.dp, vertical = 7.dp)
+                            ) {
+                                Text("Tipo ${option + 1}", color = if (child.avatarHairStyle == option) Color.White else TaskIdsColors.Ink, fontSize = 10.sp)
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    Text("Mundo", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        listOf("SKY" to "Céu", "SPACE" to "Espaço", "FOREST" to "Floresta", "ISLAND" to "Ilha").forEach { (key, label) ->
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        if (child.gameTheme == key) TaskIdsColors.Purple else TaskIdsColors.SoftBg,
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable { onSetTheme(key) }
+                                    .padding(horizontal = 12.dp, vertical = 7.dp)
+                            ) {
+                                Text(label, color = if (child.gameTheme == key) Color.White else TaskIdsColors.Ink, fontSize = 10.sp)
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -735,27 +855,23 @@ private fun AddProfileDialog(
     onConfirm: (String, String) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var avatar by remember { mutableStateOf("🧒") }
 
     SimpleFormDialog("Novo perfil infantil", onDismiss) {
-        Text("Escolha um avatar", color = TaskIdsColors.Muted, fontSize = 12.sp)
-        Spacer(Modifier.height(8.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            listOf("🧒","👧","👦","🧑","👩‍🦱","👨‍🦱","🦸","🦸‍♀️").forEach {
-                Box(
-                    modifier = Modifier
-                        .size(42.dp)
-                        .background(if (avatar == it) TaskIdsColors.SoftBlue else TaskIdsColors.SoftBg, RoundedCornerShape(11.dp))
-                        .clickable { avatar = it },
-                    contentAlignment = Alignment.Center
-                ) { Text(it, fontSize = 21.sp) }
-            }
-        }
+        Text(
+            "O avatar vetorial poderá ser personalizado depois em Configurações.",
+            color = TaskIdsColors.Muted,
+            fontSize = 12.sp
+        )
         Spacer(Modifier.height(10.dp))
-        OutlinedTextField(name, { name = it }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(
+            name,
+            { name = it },
+            label = { Text("Nome") },
+            modifier = Modifier.fillMaxWidth()
+        )
         Spacer(Modifier.height(14.dp))
         PrimaryTvButton("Criar perfil", TaskIdsColors.Green, Modifier.fillMaxWidth()) {
-            if (name.isNotBlank()) onConfirm(name, avatar)
+            if (name.isNotBlank()) onConfirm(name, "")
         }
     }
 }
