@@ -286,8 +286,8 @@ class KidsRepository(private val db: TaskDatabase) {
             if (raw.matches(Regex("^[A-Za-z0-9_-]{11}$"))) return raw
             val patterns = listOf(
                 Regex("(?:v=)([A-Za-z0-9_-]{11})"),
-                Regex("youtu\.be/([A-Za-z0-9_-]{11})"),
-                Regex("youtube\.com/shorts/([A-Za-z0-9_-]{11})")
+                Regex("""youtu\.be/([A-Za-z0-9_-]{11})"""),
+                Regex("""youtube\.com/shorts/([A-Za-z0-9_-]{11})""")
             )
             return patterns.firstNotNullOfOrNull { it.find(raw)?.groupValues?.getOrNull(1) }
         }
