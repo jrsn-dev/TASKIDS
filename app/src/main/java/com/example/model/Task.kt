@@ -21,10 +21,14 @@ data class Task(
     val title: String,
     val description: String = "",
     val durationMinutes: Int,
-    val icon: String = "📋",
+    val icon: String = "",
+    @ColumnInfo(defaultValue = "'GENERIC'")
+    val iconKey: String = "GENERIC",
     val orderIndex: Int,
     @ColumnInfo(defaultValue = "10")
     val rewardStars: Int = 10,
+    @ColumnInfo(defaultValue = "100")
+    val rewardXp: Int = 100,
     val scheduledTime: String? = null,
     @ColumnInfo(defaultValue = "''")
     val recurrenceDays: String = "",
