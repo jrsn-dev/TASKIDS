@@ -49,8 +49,8 @@ fun MissionCompleteScreen(viewModel: MainViewModel) {
             repeat(particles) { i ->
                 val angle = (i.toFloat() / particles) * 6.28318f
                 val distance = minOf(size.width, size.height) * 0.28f * burst.value
-                val x = center.x + kotlin.math.cos(angle) * distance
-                val y = center.y + kotlin.math.sin(angle) * distance
+                val x = center.x + kotlin.math.cos(angle.toDouble()).toFloat() * distance
+                val y = center.y + kotlin.math.sin(angle.toDouble()).toFloat() * distance
                 val color = when (i % 4) {
                     0 -> TaskIdsColors.Yellow
                     1 -> TaskIdsColors.Green
