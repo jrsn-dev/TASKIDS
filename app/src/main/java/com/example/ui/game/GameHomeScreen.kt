@@ -186,6 +186,13 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                         )
                     }
 
+                    Spacer(Modifier.height(10.dp))
+
+                    AchievementShelf(
+                        achievements = achievements,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
                     Spacer(Modifier.height(14.dp))
 
                     if (nextMission != null) {
