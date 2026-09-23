@@ -225,8 +225,9 @@ class MainViewModel(
             val updatedTasks = tasks.value.map {
                 if (it.id == task.id) it.copy(status = TaskStatus.COMPLETED) else it
             }
-            val allCompleted = updatedTasks.isNotEmpty() &&
-                updatedTasks.all { it.status == TaskStatus.COMPLETED }
+            val activeTasks = updatedTasks.filter { it.isActive }
+            val allCompleted = activeTasks.isNotEmpty() &&
+                activeTasks.all { it.status == TaskStatus.COMPLETED }
 
             navigateTo(if (allCompleted) AppScreen.RewardUnlocked else AppScreen.Home)
         }
