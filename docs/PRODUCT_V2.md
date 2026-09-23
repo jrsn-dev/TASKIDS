@@ -113,3 +113,23 @@ A Área dos Pais exibe:
 ## Fora de escopo desta versão
 
 A camada cloud e o aplicativo remoto dos responsáveis permanecem como próxima fase. A arquitetura local foi organizada para permitir essa evolução sem reescrever a experiência infantil.
+
+
+## Game Mode v3
+
+A experiência infantil deixa de ser uma lista de tarefas e passa a ser uma jornada de missões.
+
+O responsável continua cadastrando atividades reais, mas a criança vê:
+
+- mapa;
+- avatar;
+- missão atual;
+- XP;
+- nível;
+- combo;
+- streak;
+- estrelas;
+- conquistas;
+- recompensas.
+
+A apresentação infantil não depende de imagens externas. A identidade visual é construída em tempo real pelo aplicativo.
