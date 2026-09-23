@@ -1,6 +1,6 @@
 # TASKIDS — Roadmap
 
-## Entregue na refatoração v2
+## Entregue na refatoração v2 + Game Mode v3
 
 - arquitetura modular;
 - novo design system;
@@ -67,3 +67,25 @@
 - testes D-Pad;
 - acessibilidade;
 - performance em Android TV de entrada.
+
+
+## Entregue — Game Mode v3
+
+- avatar procedural sem imagem;
+- quatro mundos Canvas;
+- mapa de aventura;
+- missões sequenciais;
+- XP persistente;
+- níveis;
+- combo;
+- bônus de combo;
+- bônus de dia perfeito;
+- ícones vetoriais de tarefa;
+- ícones vetoriais de recompensa;
+- tela de missão;
+- feedback animado de conclusão;
+- partículas procedurais;
+- editor parental de avatar;
+- editor parental de mundo;
+- editor parental de XP por missão;
+- testes unitários de GameEngine.
