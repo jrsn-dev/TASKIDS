@@ -586,6 +586,7 @@ class MainViewModel(
 
 
     fun updateAvatar(
+        character: String,
         skinTone: Int,
         hairStyle: Int,
         hairColor: Int,
@@ -595,6 +596,7 @@ class MainViewModel(
         viewModelScope.launch {
             repository.updateChild(
                 child.copy(
+                    avatarCharacter = if (character.uppercase() == "GIRL") "GIRL" else "BOY",
                     avatarSkinTone = skinTone.coerceIn(0, 4),
                     avatarHairStyle = hairStyle.coerceIn(0, 3),
                     avatarHairColor = hairColor.coerceIn(0, 3),

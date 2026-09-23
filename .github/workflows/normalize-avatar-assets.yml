@@ -1,0 +1,86 @@
+name: Normalize avatar PNG assets
+
+on:
+  push:
+    branches:
+      - refactor/taskids-v2-ux-architecture
+    paths:
+      - ".github/workflows/normalize-avatar-assets.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/taskids-v2-ux-architecture
+          fetch-depth: 0
+
+      - name: Install Pillow
+        run: python3 -m pip install --disable-pip-version-check Pillow
+
+      - name: Re-encode avatar PNGs for Android
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from PIL import Image
+
+          sources = [
+              Path("app/src/main/assets/avatar_boy_base.png"),
+              Path("app/src/main/assets/avatar_girl_base.png"),
+          ]
+
+          for source in sources:
+              with Image.open(source) as img:
+                  rgba = img.convert("RGBA")
+                  target_height = 576
+                  if rgba.height < target_height:
+                      ratio = target_height / rgba.height
+                      width = max(1, round(rgba.width * ratio))
+                      rgba = rgba.resize((width, target_height), Image.Resampling.LANCZOS)
+
+                  rgba.save(
+                      source,
+                      format="PNG",
+                      optimize=True,
+                      compress_level=9,
+                  )
+
+                  drawable = Path("app/src/main/res/drawable-nodpi") / source.name
+                  rgba.save(
+                      drawable,
+                      format="PNG",
+                      optimize=True,
+                      compress_level=9,
+                  )
+
+                  # Force a full decode now; fail CI if the normalized PNG is not readable.
+                  for check_path in (source, drawable):
+                      with Image.open(check_path) as check:
+                          check.load()
+                          if check.mode != "RGBA":
+                              raise RuntimeError(f"{check_path} is not RGBA")
+                          if check.width < 150 or check.height < 400:
+                              raise RuntimeError(f"{check_path} is unexpectedly small: {check.size}")
+                          print(check_path, check.mode, check.size)
+          PY
+
+      - name: Commit normalized assets
+        run: |
+          if git diff --quiet -- app/src/main/assets app/src/main/res/drawable-nodpi; then
+            echo "Avatar assets already normalized."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/avatar_boy_base.png
+          git add app/src/main/assets/avatar_girl_base.png
+          git add app/src/main/res/drawable-nodpi/avatar_boy_base.png
+          git add app/src/main/res/drawable-nodpi/avatar_girl_base.png
+          git commit -m "fix(assets): normalize avatar PNG encoding for Android"
+          git push origin HEAD:refactor/taskids-v2-ux-architecture

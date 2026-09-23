@@ -10,6 +10,7 @@ object DefaultProfiles {
             avatarHairStyle = 0,
             avatarHairColor = 0,
             avatarOutfitColor = 0,
+            avatarCharacter = "BOY",
             gameTheme = "SKY"
         ),
         Child(
@@ -20,6 +21,7 @@ object DefaultProfiles {
             avatarHairStyle = 2,
             avatarHairColor = 1,
             avatarOutfitColor = 2,
+            avatarCharacter = "GIRL",
             gameTheme = "FOREST"
         )
     )

@@ -27,6 +27,8 @@ data class Child(
     val avatarHairColor: Int = 0,
     @ColumnInfo(defaultValue = "0")
     val avatarOutfitColor: Int = 0,
+    @ColumnInfo(defaultValue = "'BOY'")
+    val avatarCharacter: String = "BOY",
     @ColumnInfo(defaultValue = "'SKY'")
     val gameTheme: String = "SKY",
     val currentStreak: Int = 0,

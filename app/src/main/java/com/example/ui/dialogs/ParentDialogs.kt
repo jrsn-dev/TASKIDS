@@ -40,7 +40,9 @@ fun ParentPinDialog(
     ) {
         Column(
             modifier = Modifier
-                .width(390.dp)
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .widthIn(max = 390.dp)
                 .background(Color.White, RoundedCornerShape(30.dp))
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally

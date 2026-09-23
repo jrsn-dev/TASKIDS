@@ -30,6 +30,7 @@ import com.example.ui.game.GameAvatar
 import com.example.ui.game.GameIcon
 import com.example.ui.game.RewardVectorIcon
 import com.example.ui.navigation.AppScreen
+import com.example.ui.library.ParentLibraryContent
 import com.example.viewmodel.MainViewModel
 
 private enum class ParentSection(val label: String, val icon: String) {
@@ -37,12 +38,24 @@ private enum class ParentSection(val label: String, val icon: String) {
     TASKS("Tarefas", "✅"),
     ROUTINES("Rotinas", "🗓"),
     REWARDS("Recompensas", "🎁"),
+    LIBRARY("Biblioteca", "📚"),
     PROFILES("Perfis", "👨‍👩‍👧‍👦"),
     SETTINGS("Configurações", "⚙")
 }
 
 @Composable
 fun ParentDashboardScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) {
+            ParentMobileDashboardScreen(viewModel)
+        } else {
+            ParentDashboardLargeScreen(viewModel)
+        }
+    }
+}
+
+@Composable
+private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
     val child by viewModel.currentChild.collectAsState()
     val children by viewModel.children.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
@@ -165,6 +178,9 @@ fun ParentDashboardScreen(viewModel: MainViewModel) {
                     ParentSection.REWARDS -> RewardsParentSection(
                         rewards = rewards,
                         onAdd = { showAddReward = true }
+                    )
+                    ParentSection.LIBRARY -> ParentLibraryContent(
+                        modifier = Modifier.fillMaxSize()
                     )
                     ParentSection.PROFILES -> ProfilesSection(
                         children = children,
@@ -654,7 +670,7 @@ private fun SettingsSection(
     onToggleSound: () -> Unit,
     onUpdatePin: (String) -> Boolean,
     onReset: () -> Unit,
-    onUpdateAvatar: (Int, Int, Int, Int) -> Unit,
+    onUpdateAvatar: (String, Int, Int, Int, Int) -> Unit,
     onSetTheme: (String) -> Unit
 ) {
     var pin by remember { mutableStateOf("") }
@@ -739,12 +755,43 @@ private fun SettingsSection(
                         fontWeight = FontWeight.Black
                     )
                     Text(
-                        "Tudo é desenhado pelo próprio app, sem imagem externa.",
+                        "Personagem 2D em PNG. Conquistas aparecem como acessórios; pele, cabelo e roupa ficam salvos para as próximas camadas visuais.",
                         color = TaskIdsColors.Muted,
                         fontSize = 11.sp
                     )
                     Spacer(Modifier.height(10.dp))
 
+                    Text("Personagem", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("BOY" to "Menino", "GIRL" to "Menina").forEach { (key, label) ->
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        if (child.avatarCharacter == key) TaskIdsColors.Blue else TaskIdsColors.SoftBg,
+                                        RoundedCornerShape(10.dp)
+                                    )
+                                    .clickable {
+                                        onUpdateAvatar(
+                                            key,
+                                            child.avatarSkinTone,
+                                            child.avatarHairStyle,
+                                            child.avatarHairColor,
+                                            child.avatarOutfitColor
+                                        )
+                                    }
+                                    .padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    label,
+                                    color = if (child.avatarCharacter == key) Color.White else TaskIdsColors.Ink,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(Modifier.height(10.dp))
                     Text("Tom de pele", color = TaskIdsColors.Muted, fontSize = 10.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         repeat(5) { option ->
@@ -756,7 +803,7 @@ private fun SettingsSection(
                                         CircleShape
                                     )
                                     .clickable {
-                                        onUpdateAvatar(option, child.avatarHairStyle, child.avatarHairColor, child.avatarOutfitColor)
+                                        onUpdateAvatar(child.avatarCharacter, option, child.avatarHairStyle, child.avatarHairColor, child.avatarOutfitColor)
                                     }
                             )
                         }
@@ -773,7 +820,7 @@ private fun SettingsSection(
                                         RoundedCornerShape(10.dp)
                                     )
                                     .clickable {
-                                        onUpdateAvatar(child.avatarSkinTone, option, child.avatarHairColor, child.avatarOutfitColor)
+                                        onUpdateAvatar(child.avatarCharacter, child.avatarSkinTone, option, child.avatarHairColor, child.avatarOutfitColor)
                                     }
                                     .padding(horizontal = 12.dp, vertical = 7.dp)
                             ) {
@@ -797,7 +844,7 @@ private fun SettingsSection(
                                     .size(30.dp)
                                     .background(color, CircleShape)
                                     .clickable {
-                                        onUpdateAvatar(child.avatarSkinTone, child.avatarHairStyle, option, child.avatarOutfitColor)
+                                        onUpdateAvatar(child.avatarCharacter, child.avatarSkinTone, child.avatarHairStyle, option, child.avatarOutfitColor)
                                     }
                                     .then(
                                         if (child.avatarHairColor == option) {
@@ -824,7 +871,7 @@ private fun SettingsSection(
                                     .size(30.dp)
                                     .background(color, CircleShape)
                                     .clickable {
-                                        onUpdateAvatar(child.avatarSkinTone, child.avatarHairStyle, child.avatarHairColor, option)
+                                        onUpdateAvatar(child.avatarCharacter, child.avatarSkinTone, child.avatarHairStyle, child.avatarHairColor, option)
                                     }
                             )
                         }
