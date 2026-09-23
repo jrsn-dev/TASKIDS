@@ -8,6 +8,7 @@ on:
     paths:
       - ".github/workflows/android-real-screenshots.yml"
       - "scripts/capture_real_screenshots.sh"
+      - "app/src/main/java/com/example/ui/game/GameAvatar.kt"
 
 jobs:
   screenshots:
