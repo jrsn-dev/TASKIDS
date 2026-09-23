@@ -1,4 +1,5 @@
 name: Android real screenshots
+# Visual regression capture for real emulator output
 
 on:
   push:
