@@ -22,6 +22,7 @@ import com.example.ui.components.PrimaryTvButton
 import com.example.ui.components.StarPill
 import com.example.ui.components.taskIdsFocus
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.game.RewardVectorIcon
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
@@ -97,7 +98,7 @@ fun RewardsScreen(viewModel: MainViewModel) {
                 .padding(16.dp)
         ) {
             Text(
-                "💡 Tempo de tela não abre um navegador livre. A experiência permanece dentro da área controlada do TASKIDS.",
+                "Tempo de tela não abre um navegador livre. A experiência permanece dentro da área controlada do TASKIDS.",
                 color = Color.White.copy(alpha = 0.78f),
                 fontSize = 13.sp
             )
@@ -131,7 +132,11 @@ private fun RewardCard(
                 .background(TaskIdsColors.SoftBlue, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Text(reward.icon, fontSize = 44.sp)
+            RewardVectorIcon(
+                type = reward.type,
+                modifier = Modifier.size(48.dp),
+                tint = TaskIdsColors.Blue
+            )
         }
 
         Spacer(Modifier.height(15.dp))
@@ -153,7 +158,7 @@ private fun RewardCard(
         Spacer(Modifier.weight(1f))
 
         Text(
-            "⭐ ${reward.costStars}",
+            "${reward.costStars} estrelas",
             color = TaskIdsColors.Ink,
             fontSize = 20.sp,
             fontWeight = FontWeight.Black
