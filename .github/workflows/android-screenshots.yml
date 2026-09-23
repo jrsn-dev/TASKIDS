@@ -1,0 +1,97 @@
+name: Android real screenshots
+
+on:
+  push:
+    branches:
+      - refactor/taskids-v2-ux-architecture
+    paths:
+      - ".github/workflows/android-screenshots.yml"
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Gradle 9.3.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "9.3.1"
+
+      - name: Build debug APK
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Capture screenshots on Android emulator
+        uses: ReactiveCircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          profile: pixel_6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            set -euxo pipefail
+            mkdir -p screenshots
+            adb install -r app/build/outputs/apk/debug/app-debug.apk
+            adb shell am force-stop com.aistudio.kidstasks.pqwxzt
+            adb shell monkey -p com.aistudio.kidstasks.pqwxzt -c android.intent.category.LAUNCHER 1
+            sleep 5
+
+            adb exec-out screencap -p > screenshots/01-home-infantil.png
+
+            cat > /tmp/tap_text.py <<'PY'
+            import subprocess, sys, time, xml.etree.ElementTree as ET, re
+            target = sys.argv[1]
+            subprocess.run(["adb","shell","uiautomator","dump","/sdcard/window.xml"], check=True, stdout=subprocess.DEVNULL)
+            subprocess.run(["adb","pull","/sdcard/window.xml","/tmp/window.xml"], check=True, stdout=subprocess.DEVNULL)
+            root=ET.parse("/tmp/window.xml").getroot()
+            nodes=[]
+            for n in root.iter("node"):
+                text=n.attrib.get("text","")
+                desc=n.attrib.get("content-desc","")
+                if text==target or desc==target:
+                    b=n.attrib.get("bounds","")
+                    m=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", b)
+                    if m:
+                        x1,y1,x2,y2=map(int,m.groups())
+                        nodes.append(((x1+x2)//2,(y1+y2)//2,b,text,desc))
+            if not nodes:
+                print("NOT_FOUND", target)
+                subprocess.run(["adb","shell","uiautomator","dump","/sdcard/window.xml"])
+                sys.exit(2)
+            x,y,*_=nodes[0]
+            print("TAP", target, x, y)
+            subprocess.run(["adb","shell","input","tap",str(x),str(y)], check=True)
+            time.sleep(1)
+            PY
+
+            python /tmp/tap_text.py PAIS
+            sleep 2
+            adb exec-out screencap -p > screenshots/02-pin-pais.png
+
+            python /tmp/tap_text.py 0
+            python /tmp/tap_text.py 0
+            python /tmp/tap_text.py 0
+            python /tmp/tap_text.py 0
+            sleep 5
+            adb exec-out screencap -p > screenshots/03-dashboard-pais-mobile.png
+
+            python /tmp/tap_text.py Biblioteca
+            sleep 3
+            adb exec-out screencap -p > screenshots/04-biblioteca.png
+
+      - name: Upload real app screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: TASKIDS-real-screenshots
+          path: screenshots/*.png
+          if-no-files-found: error
+          retention-days: 14
