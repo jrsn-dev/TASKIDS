@@ -35,6 +35,7 @@ fun HomeScreen(viewModel: MainViewModel) {
     val children by viewModel.children.collectAsState()
     val child by viewModel.currentChild.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
+    val achievements by viewModel.achievements.collectAsState()
 
     var showPin by remember { mutableStateOf(false) }
 
@@ -127,6 +128,7 @@ fun HomeScreen(viewModel: MainViewModel) {
             ) {
                 SmallStat("🔥", "${child?.currentStreak ?: 0} dias", "sequência")
                 SmallStat("🏆", "Nível ${((child?.totalStars ?: 0) / 100) + 1}", "jornada")
+                SmallStat("🎖", "${achievements.count { it.unlocked }}", "conquistas")
             }
         }
 
