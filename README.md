@@ -88,7 +88,7 @@ app/src/main/java/com/example/
 
 ## Banco
 
-Room versão 2.
+Room versão 3.
 
 A atualização da versão anterior usa migration explícita e preserva tarefas já existentes.
 
@@ -120,3 +120,22 @@ O workflow `.github/workflows/android-ci.yml` executa build debug e testes unit�
 ## Próxima fase
 
 A próxima evolução recomendada é separar a experiência dos responsáveis em aplicativo mobile conectado a uma camada cloud, mantendo o Android TV como experiência principal da criança.
+
+
+## Game Mode v3
+
+A experiência infantil principal não depende de imagens PNG/JPG ou personagens pré-renderizados.
+
+O jogo é construído em Compose/Canvas:
+
+- avatar procedural;
+- mapa de missões;
+- mundos SKY, SPACE, FOREST e ISLAND;
+- ícones vetoriais;
+- XP;
+- níveis;
+- combos;
+- partículas de conclusão;
+- conquistas.
+
+Documentação: [Game Mode v3](docs/GAME_MODE_V3.md)
