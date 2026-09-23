@@ -5,23 +5,28 @@ import androidx.room.PrimaryKey
 import java.io.Serializable
 
 enum class TaskStatus {
-    PENDING,      // Não iniciada
-    IN_PROGRESS,  // Em progresso
-    COMPLETED,    // Concluída
-    OVERDUE       // Atrasada
+    PENDING,
+    IN_PROGRESS,
+    COMPLETED,
+    OVERDUE
 }
 
 @Entity(tableName = "tasks")
 data class Task(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
+    val childId: Long = 1,
     val title: String,
     val description: String = "",
     val durationMinutes: Int,
     val icon: String = "📋",
     val orderIndex: Int,
+    val rewardStars: Int = 10,
+    val scheduledTime: String? = null,
+    val recurrenceDays: String = "",
+    val isRecurring: Boolean = false,
     val status: TaskStatus = TaskStatus.PENDING,
     val createdAt: Long = System.currentTimeMillis(),
     val completedAt: Long? = null,
-    val isActive: Boolean = false
+    val isActive: Boolean = true
 ) : Serializable
