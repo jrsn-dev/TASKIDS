@@ -21,12 +21,20 @@ class AppPreferencesRepository(context: Context) {
         private const val KEY_TIMER_REMAINING_SECONDS = "timer_remaining_seconds"
         private const val KEY_TIMER_PAUSED = "timer_paused"
 
-        private const val DEFAULT_PIN = "1234"
+        private const val DEFAULT_PIN = "0000"
     }
 
     init {
-        if (!prefs.contains(KEY_PARENTAL_PIN_HASH)) {
-            prefs.edit().putString(KEY_PARENTAL_PIN_HASH, hashPin(DEFAULT_PIN)).apply()
+        val currentHash = prefs.getString(KEY_PARENTAL_PIN_HASH, null)
+        val legacyDefaultHash = hashPin("1234")
+        when {
+            currentHash == null -> {
+                prefs.edit().putString(KEY_PARENTAL_PIN_HASH, hashPin(DEFAULT_PIN)).apply()
+            }
+            currentHash == legacyDefaultHash -> {
+                // One-time migration from the previous factory default.
+                prefs.edit().putString(KEY_PARENTAL_PIN_HASH, hashPin(DEFAULT_PIN)).apply()
+            }
         }
     }
 
