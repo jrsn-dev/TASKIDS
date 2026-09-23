@@ -78,9 +78,13 @@ capture() {
 
 wait_for_device
 adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb logcat -c
 adb shell am force-stop com.aistudio.kidstasks.pqwxzt
-adb shell am start -n com.aistudio.kidstasks.pqwxzt/com.example.MainActivity
+adb shell am start -W -n com.aistudio.kidstasks.pqwxzt/com.example.MainActivity | tee real-screenshots/am-start.txt
 sleep 8
+adb shell pidof com.aistudio.kidstasks.pqwxzt > real-screenshots/pid.txt || true
+adb shell dumpsys window windows | grep -E "mCurrentFocus|mFocusedApp" > real-screenshots/focus.txt || true
+adb logcat -d > real-screenshots/logcat.txt || true
 
 tap_text_optional "Wait"
 capture "01-home-game.png"
