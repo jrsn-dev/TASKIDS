@@ -783,6 +783,54 @@ private fun SettingsSection(
                     }
 
                     Spacer(Modifier.height(8.dp))
+                    Text("Cor do cabelo", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        val hairColors = listOf(
+                            Color(0xFF3C2A23),
+                            Color(0xFF6B4327),
+                            Color(0xFF1C1B20),
+                            Color(0xFFC58D3E)
+                        )
+                        hairColors.forEachIndexed { option, color ->
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .background(color, CircleShape)
+                                    .clickable {
+                                        onUpdateAvatar(child.avatarSkinTone, child.avatarHairStyle, option, child.avatarOutfitColor)
+                                    }
+                                    .then(
+                                        if (child.avatarHairColor == option) {
+                                            Modifier.padding(3.dp)
+                                        } else Modifier
+                                    )
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
+                    Text("Cor da roupa", color = TaskIdsColors.Muted, fontSize = 10.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        val outfitColors = listOf(
+                            TaskIdsColors.Blue,
+                            TaskIdsColors.Green,
+                            TaskIdsColors.Purple,
+                            TaskIdsColors.Orange,
+                            TaskIdsColors.Pink
+                        )
+                        outfitColors.forEachIndexed { option, color ->
+                            Box(
+                                modifier = Modifier
+                                    .size(30.dp)
+                                    .background(color, CircleShape)
+                                    .clickable {
+                                        onUpdateAvatar(child.avatarSkinTone, child.avatarHairStyle, child.avatarHairColor, option)
+                                    }
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(8.dp))
                     Text("Mundo", color = TaskIdsColors.Muted, fontSize = 10.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         listOf("SKY" to "Céu", "SPACE" to "Espaço", "FOREST" to "Floresta", "ISLAND" to "Ilha").forEach { (key, label) ->
