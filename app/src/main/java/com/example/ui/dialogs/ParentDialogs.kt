@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.components.PrimaryTvButton
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.game.GameIcon
 import com.example.viewmodel.MainViewModel
 import com.example.viewmodel.PinVerificationResult
 
@@ -152,9 +153,10 @@ fun AddTaskDialog(
     onConfirm: (
         title: String,
         duration: Int,
-        icon: String,
+        iconKey: String,
         description: String,
         stars: Int,
+        xp: Int,
         scheduledTime: String?,
         recurrenceDays: String,
         recurring: Boolean
@@ -163,11 +165,24 @@ fun AddTaskDialog(
     var title by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf("15") }
     var stars by remember { mutableStateOf("10") }
+    var xp by remember { mutableStateOf("100") }
     var description by remember { mutableStateOf("") }
     var scheduledTime by remember { mutableStateOf("") }
-    var icon by remember { mutableStateOf("📋") }
+    var iconKey by remember { mutableStateOf("GENERIC") }
     var recurring by remember { mutableStateOf(false) }
     var selectedDays by remember { mutableStateOf(setOf(1,2,3,4,5)) }
+
+    val iconOptions = listOf(
+        "GENERIC" to "Geral",
+        "BOOK" to "Leitura",
+        "BATH" to "Banho",
+        "MEAL" to "Refeição",
+        "HOMEWORK" to "Lição",
+        "TOYS" to "Organizar",
+        "TOOTH" to "Dentes",
+        "SPORT" to "Esporte",
+        "CLEAN" to "Limpeza"
+    )
 
     Box(
         modifier = Modifier
@@ -177,37 +192,39 @@ fun AddTaskDialog(
     ) {
         Column(
             modifier = Modifier
-                .width(620.dp)
+                .width(680.dp)
                 .background(Color.White, RoundedCornerShape(28.dp))
                 .padding(26.dp)
         ) {
+            Text("Nova missão", color = TaskIdsColors.Ink, fontSize = 25.sp, fontWeight = FontWeight.Black)
             Text(
-                "Nova atividade",
-                color = TaskIdsColors.Ink,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                "Defina tempo, estrelas e quando essa missão aparece.",
+                "Defina objetivo, duração e recompensa de jogo.",
                 color = TaskIdsColors.Muted,
                 fontSize = 13.sp
             )
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(16.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("📋","📚","🛁","🍽️","📝","🧸","🦷","⚽","🎨","🧹").forEach { option ->
-                    Box(
+                iconOptions.forEach { (key, label) ->
+                    Column(
                         modifier = Modifier
-                            .size(42.dp)
+                            .width(64.dp)
                             .background(
-                                if (icon == option) TaskIdsColors.SoftBlue else TaskIdsColors.SoftBg,
+                                if (iconKey == key) TaskIdsColors.SoftBlue else TaskIdsColors.SoftBg,
                                 RoundedCornerShape(12.dp)
                             )
-                            .clickable { icon = option },
-                        contentAlignment = Alignment.Center
+                            .clickable { iconKey = key }
+                            .padding(vertical = 8.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(option, fontSize = 20.sp)
+                        GameIcon(
+                            key = key,
+                            modifier = Modifier.size(28.dp),
+                            tint = if (iconKey == key) TaskIdsColors.Blue else TaskIdsColors.Muted
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(label, color = TaskIdsColors.Ink, fontSize = 8.sp)
                     }
                 }
             }
@@ -217,7 +234,7 @@ fun AddTaskDialog(
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Nome da tarefa") },
+                label = { Text("Nome da missão") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -242,9 +259,17 @@ fun AddTaskDialog(
                     singleLine = true
                 )
                 OutlinedTextField(
+                    value = xp,
+                    onValueChange = { xp = it.filter(Char::isDigit).take(4) },
+                    label = { Text("XP") },
+                    modifier = Modifier.weight(1f),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    singleLine = true
+                )
+                OutlinedTextField(
                     value = scheduledTime,
                     onValueChange = { scheduledTime = it.take(5) },
-                    label = { Text("Horário (HH:mm)") },
+                    label = { Text("Horário") },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -263,11 +288,7 @@ fun AddTaskDialog(
             Spacer(Modifier.height(14.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    "Repetir na semana",
-                    color = TaskIdsColors.Ink,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("Repetir na semana", color = TaskIdsColors.Ink, fontWeight = FontWeight.Bold)
                 Spacer(Modifier.width(12.dp))
                 Box(
                     modifier = Modifier
@@ -326,7 +347,7 @@ fun AddTaskDialog(
                     onClick = onDismiss
                 )
                 PrimaryTvButton(
-                    text = "Adicionar tarefa",
+                    text = "Adicionar missão",
                     background = TaskIdsColors.Blue,
                     modifier = Modifier.weight(1f),
                     onClick = {
@@ -335,9 +356,10 @@ fun AddTaskDialog(
                             onConfirm(
                                 safeTitle,
                                 duration.toIntOrNull()?.coerceIn(1,240) ?: 15,
-                                icon,
+                                iconKey,
                                 description,
                                 stars.toIntOrNull()?.coerceIn(1,100) ?: 10,
+                                xp.toIntOrNull()?.coerceIn(10,1000) ?: 100,
                                 scheduledTime.ifBlank { null },
                                 selectedDays.sorted().joinToString(","),
                                 recurring
