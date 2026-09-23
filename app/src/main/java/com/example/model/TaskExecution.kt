@@ -1,5 +1,6 @@
 package com.example.model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -15,5 +16,9 @@ data class TaskExecution(
     val plannedDurationMinutes: Int,
     val actualDurationSeconds: Int,
     val earnedStars: Int,
+    @ColumnInfo(defaultValue = "0")
+    val earnedXp: Int = 0,
+    @ColumnInfo(defaultValue = "1")
+    val combo: Int = 1,
     val result: TaskStatus = TaskStatus.COMPLETED
 )
