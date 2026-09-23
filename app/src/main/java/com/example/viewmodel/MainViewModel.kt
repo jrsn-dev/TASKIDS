@@ -20,6 +20,7 @@ import com.example.model.Task
 import com.example.model.TaskExecution
 import com.example.model.TaskStatus
 import com.example.ui.navigation.AppScreen
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,6 +51,7 @@ enum class PinVerificationResult {
     LOCKED
 }
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
     private val repository: TaskRepository,
     private val prefs: AppPreferencesRepository
