@@ -27,7 +27,11 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          from PIL import Image
+          from PIL import Image, ImageFile
+
+          # The current PNGs are truncated. Pillow can salvage the decodable
+          # pixels, then we write a brand-new standards-compliant RGBA PNG.
+          ImageFile.LOAD_TRUNCATED_IMAGES = True
 
           sources = [
               Path("app/src/main/assets/avatar_boy_base.png"),
