@@ -30,6 +30,7 @@ import com.example.ui.game.GameAvatar
 import com.example.ui.game.GameIcon
 import com.example.ui.game.RewardVectorIcon
 import com.example.ui.navigation.AppScreen
+import com.example.ui.library.ParentLibraryContent
 import com.example.viewmodel.MainViewModel
 
 private enum class ParentSection(val label: String, val icon: String) {
@@ -37,12 +38,24 @@ private enum class ParentSection(val label: String, val icon: String) {
     TASKS("Tarefas", "✅"),
     ROUTINES("Rotinas", "🗓"),
     REWARDS("Recompensas", "🎁"),
+    LIBRARY("Biblioteca", "📚"),
     PROFILES("Perfis", "👨‍👩‍👧‍👦"),
     SETTINGS("Configurações", "⚙")
 }
 
 @Composable
 fun ParentDashboardScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) {
+            ParentMobileDashboardScreen(viewModel)
+        } else {
+            ParentDashboardLargeScreen(viewModel)
+        }
+    }
+}
+
+@Composable
+private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
     val child by viewModel.currentChild.collectAsState()
     val children by viewModel.children.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
@@ -165,6 +178,9 @@ fun ParentDashboardScreen(viewModel: MainViewModel) {
                     ParentSection.REWARDS -> RewardsParentSection(
                         rewards = rewards,
                         onAdd = { showAddReward = true }
+                    )
+                    ParentSection.LIBRARY -> ParentLibraryContent(
+                        modifier = Modifier.fillMaxSize()
                     )
                     ParentSection.PROFILES -> ProfilesSection(
                         children = children,
