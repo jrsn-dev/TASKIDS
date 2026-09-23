@@ -17,13 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.navigation.AppScreen
-import com.example.ui.screens.HomeScreen
+import com.example.ui.game.GameHomeScreen
 import com.example.ui.screens.ParentDashboardScreen
 import com.example.ui.screens.ReportsScreen
-import com.example.ui.screens.RewardUnlockedScreen
+import com.example.ui.game.MissionCompleteScreen
 import com.example.ui.screens.RewardsScreen
 import com.example.ui.screens.ScreenTimeScreen
-import com.example.ui.screens.TimerScreenV2
+import com.example.ui.game.GameMissionScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.viewmodel.MainViewModel
 import com.example.viewmodel.MainViewModelFactory
@@ -73,9 +73,9 @@ private fun TaskIdsApp(viewModel: MainViewModel) {
             )
     ) {
         when (val current = screen) {
-            AppScreen.Home -> HomeScreen(viewModel)
-            is AppScreen.Timer -> TimerScreenV2(viewModel, current.taskId)
-            AppScreen.RewardUnlocked -> RewardUnlockedScreen(viewModel)
+            AppScreen.Home -> GameHomeScreen(viewModel)
+            is AppScreen.Timer -> GameMissionScreen(viewModel, current.taskId)
+            AppScreen.RewardUnlocked -> MissionCompleteScreen(viewModel)
             AppScreen.Rewards -> RewardsScreen(viewModel)
             AppScreen.ScreenTime -> ScreenTimeScreen(viewModel)
             AppScreen.Parent -> ParentDashboardScreen(viewModel)
