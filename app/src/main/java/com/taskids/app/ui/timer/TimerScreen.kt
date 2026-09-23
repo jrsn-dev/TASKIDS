@@ -229,12 +229,21 @@ fun TimerScreen(viewModel: MainViewModel, taskId: Int) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            if (timer.isRunning) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            null,
-                            tint = Color(0xFF6D38D8),
-                            modifier = Modifier.size(30.dp)
-                        )
+                        if (timer.isRunning) {
+                            Text(
+                                "Ⅱ",
+                                color = Color(0xFF6D38D8),
+                                fontSize = 26.sp,
+                                fontWeight = FontWeight.Black
+                            )
+                        } else {
+                            Icon(
+                                Icons.Default.PlayArrow,
+                                contentDescription = null,
+                                tint = Color(0xFF6D38D8),
+                                modifier = Modifier.size(30.dp)
+                            )
+                        }
                         Text(
                             if (timer.isRunning) "Pausar" else "Retomar",
                             color = Color(0xFF3D2379),
