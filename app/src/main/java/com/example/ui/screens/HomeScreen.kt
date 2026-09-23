@@ -38,8 +38,9 @@ fun HomeScreen(viewModel: MainViewModel) {
 
     var showPin by remember { mutableStateOf(false) }
 
-    val completed = tasks.count { it.status == TaskStatus.COMPLETED }
-    val progress = if (tasks.isEmpty()) 0f else completed.toFloat() / tasks.size.toFloat()
+    val visibleTasks = tasks.filter { it.isActive }
+    val completed = visibleTasks.count { it.status == TaskStatus.COMPLETED }
+    val progress = if (visibleTasks.isEmpty()) 0f else completed.toFloat() / visibleTasks.size.toFloat()
 
     Column(
         modifier = Modifier
@@ -140,7 +141,7 @@ fun HomeScreen(viewModel: MainViewModel) {
 
         Spacer(Modifier.height(12.dp))
 
-        if (tasks.isEmpty()) {
+        if (visibleTasks.isEmpty()) {
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -162,7 +163,7 @@ fun HomeScreen(viewModel: MainViewModel) {
                 horizontalArrangement = Arrangement.spacedBy(18.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                items(tasks, key = { it.id }) { task ->
+                items(visibleTasks, key = { it.id }) { task ->
                     TaskCardV2(
                         task = task,
                         onClick = { viewModel.selectTask(task) }
@@ -193,7 +194,7 @@ fun HomeScreen(viewModel: MainViewModel) {
 
             Column(modifier = Modifier.width(220.dp)) {
                 Text(
-                    if (completed == tasks.size && tasks.isNotEmpty()) "Tudo pronto!" else "Progresso do dia",
+                    if (completed == visibleTasks.size && visibleTasks.isNotEmpty()) "Tudo pronto!" else "Progresso do dia",
                     color = TaskIdsColors.Ink,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Black
