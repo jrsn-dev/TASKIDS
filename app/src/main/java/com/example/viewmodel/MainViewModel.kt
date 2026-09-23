@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.local.TaskDatabase
 import com.example.data.preferences.AppPreferencesRepository
 import com.example.data.repository.TaskRepository
+import com.example.game.GameEngine
+import com.example.game.MissionReward
 import com.example.model.Achievement
 import com.example.model.Child
 import com.example.model.DefaultProfiles
@@ -33,6 +35,16 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
+
+data class MissionCompletion(
+    val taskTitle: String,
+    val stars: Int,
+    val xp: Int,
+    val combo: Int,
+    val comboBonusStars: Int,
+    val perfectDayStars: Int = 0,
+    val perfectDayXp: Int = 0
+)
 
 data class TimerState(
     val taskId: Int = 0,
@@ -117,6 +129,20 @@ class MainViewModel(
                 description = "Alcançou 100 estrelas na jornada.",
                 icon = "⭐",
                 unlocked = stars >= 100
+            ),
+            Achievement(
+                id = "combo_5",
+                title = "Combo de missões",
+                description = "Concluiu 5 missões em sequência.",
+                icon = "",
+                unlocked = (profile?.bestCombo ?: 0) >= 5
+            ),
+            Achievement(
+                id = "xp_2500",
+                title = "Guardião da jornada",
+                description = "Conquistou 2500 XP.",
+                icon = "",
+                unlocked = (profile?.totalXp ?: 0) >= 2500
             )
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
@@ -134,6 +160,9 @@ class MainViewModel(
 
     private val _lastRewardMessage = MutableStateFlow<String?>(null)
     val lastRewardMessage: StateFlow<String?> = _lastRewardMessage.asStateFlow()
+
+    private val _lastMissionCompletion = MutableStateFlow<MissionCompletion?>(null)
+    val lastMissionCompletion: StateFlow<MissionCompletion?> = _lastMissionCompletion.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -168,6 +197,8 @@ class MainViewModel(
         icon: String,
         description: String = "",
         rewardStars: Int = 10,
+        rewardXp: Int = 100,
+        iconKey: String = "GENERIC",
         scheduledTime: String? = null,
         recurrenceDays: String = "",
         isRecurring: Boolean = false
@@ -184,6 +215,8 @@ class MainViewModel(
                     icon = icon,
                     orderIndex = nextOrder,
                     rewardStars = rewardStars.coerceIn(1, 100),
+                    rewardXp = rewardXp.coerceIn(10, 1000),
+                    iconKey = iconKey,
                     scheduledTime = scheduledTime?.takeIf { it.isNotBlank() },
                     recurrenceDays = recurrenceDays,
                     isRecurring = isRecurring
@@ -203,6 +236,7 @@ class MainViewModel(
     fun restartAllTasks() {
         viewModelScope.launch {
             repository.resetTasksForChild(selectedChildId.value)
+            currentChild.value?.let { repository.updateChild(it.copy(currentCombo = 0)) }
             prefs.clearTimer()
             timerJob?.cancel()
             _timerState.value = TimerState()
@@ -213,12 +247,28 @@ class MainViewModel(
     fun markTaskAsCompleted(task: Task) {
         viewModelScope.launch {
             val now = System.currentTimeMillis()
+            val child = currentChild.value ?: return@launch
             val startedAt = if (timerState.value.taskId == task.id && timerState.value.startedAt > 0) {
                 timerState.value.startedAt
             } else {
                 now - task.durationMinutes * 60_000L
             }
             val actualSeconds = ((now - startedAt) / 1_000L).toInt().coerceAtLeast(1)
+
+            val baseReward = GameEngine.rewardForCompletion(
+                baseStars = task.rewardStars,
+                baseXp = task.rewardXp,
+                previousCombo = child.currentCombo
+            )
+
+            val updatedTasks = tasks.value.map {
+                if (it.id == task.id) it.copy(status = TaskStatus.COMPLETED) else it
+            }
+            val activeTasks = updatedTasks.filter { it.isActive }
+            val completedActive = activeTasks.count { it.status == TaskStatus.COMPLETED }
+            val perfectBonus = GameEngine.perfectDayBonus(activeTasks.size, completedActive)
+            val perfectStars = perfectBonus.first
+            val perfectXp = perfectBonus.second
 
             repository.updateTask(
                 task.copy(
@@ -236,38 +286,48 @@ class MainViewModel(
                     completedAt = now,
                     plannedDurationMinutes = task.durationMinutes,
                     actualDurationSeconds = actualSeconds,
-                    earnedStars = task.rewardStars
+                    earnedStars = baseReward.earnedStars + perfectStars,
+                    earnedXp = baseReward.earnedXp + perfectXp,
+                    combo = baseReward.newCombo
                 )
             )
 
-            currentChild.value?.let { child ->
-                val today = TimeUnit.MILLISECONDS.toDays(now)
-                val newStreak = when (child.lastActiveEpochDay) {
-                    today -> child.currentStreak
-                    today - 1 -> child.currentStreak + 1
-                    else -> 1
-                }
-                repository.updateChild(
-                    child.copy(
-                        totalStars = child.totalStars + task.rewardStars,
-                        currentStreak = newStreak,
-                        longestStreak = max(child.longestStreak, newStreak),
-                        lastActiveEpochDay = today
-                    )
-                )
+            val today = TimeUnit.MILLISECONDS.toDays(now)
+            val newStreak = when (child.lastActiveEpochDay) {
+                today -> child.currentStreak
+                today - 1 -> child.currentStreak + 1
+                else -> 1
             }
+
+            repository.updateChild(
+                child.copy(
+                    totalStars = child.totalStars + baseReward.earnedStars + perfectStars,
+                    totalXp = child.totalXp + baseReward.earnedXp + perfectXp,
+                    currentCombo = baseReward.newCombo,
+                    bestCombo = max(child.bestCombo, baseReward.newCombo),
+                    currentStreak = newStreak,
+                    longestStreak = max(child.longestStreak, newStreak),
+                    lastActiveEpochDay = today
+                )
+            )
+
+            _lastMissionCompletion.value = MissionCompletion(
+                taskTitle = task.title,
+                stars = baseReward.earnedStars + perfectStars,
+                xp = baseReward.earnedXp + perfectXp,
+                combo = baseReward.newCombo,
+                comboBonusStars = baseReward.comboBonusStars,
+                perfectDayStars = perfectStars,
+                perfectDayXp = perfectXp
+            )
 
             playAlertSound(ToneGenerator.TONE_PROP_ACK)
             clearActiveTimer()
 
-            val updatedTasks = tasks.value.map {
-                if (it.id == task.id) it.copy(status = TaskStatus.COMPLETED) else it
-            }
-            val activeTasks = updatedTasks.filter { it.isActive }
             val allCompleted = activeTasks.isNotEmpty() &&
                 activeTasks.all { it.status == TaskStatus.COMPLETED }
 
-            navigateTo(if (allCompleted) AppScreen.RewardUnlocked else AppScreen.Home)
+            navigateTo(AppScreen.RewardUnlocked)
         }
     }
 
@@ -520,6 +580,33 @@ class MainViewModel(
                     daysCsv = daysCsv
                 )
             )
+        }
+    }
+
+
+    fun updateAvatar(
+        skinTone: Int,
+        hairStyle: Int,
+        hairColor: Int,
+        outfitColor: Int
+    ) {
+        val child = currentChild.value ?: return
+        viewModelScope.launch {
+            repository.updateChild(
+                child.copy(
+                    avatarSkinTone = skinTone.coerceIn(0, 4),
+                    avatarHairStyle = hairStyle.coerceIn(0, 3),
+                    avatarHairColor = hairColor.coerceIn(0, 3),
+                    avatarOutfitColor = outfitColor.coerceIn(0, 4)
+                )
+            )
+        }
+    }
+
+    fun setGameTheme(theme: String) {
+        val child = currentChild.value ?: return
+        viewModelScope.launch {
+            repository.updateChild(child.copy(gameTheme = theme))
         }
     }
 
