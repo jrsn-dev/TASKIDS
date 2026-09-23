@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -19,7 +20,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.asImageBitmap
+import android.graphics.BitmapFactory
 import androidx.compose.ui.unit.dp
 import com.example.R
 import com.example.model.Child
@@ -53,16 +56,23 @@ fun GameAvatar(
         else -> R.drawable.avatar_boy_base
     }
 
+    val resources = LocalContext.current.resources
+    val avatarBitmap = remember(avatarRes) {
+        BitmapFactory.decodeResource(resources, avatarRes)?.asImageBitmap()
+    }
+
     Box(
         modifier = modifier.graphicsLayer { translationY = bob },
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            painter = painterResource(avatarRes),
-            contentDescription = "Avatar de ${child.name}",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Fit
-        )
+        avatarBitmap?.let { bitmap ->
+            Image(
+                bitmap = bitmap,
+                contentDescription = "Avatar de ${child.name}",
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Fit
+            )
+        }
 
         AvatarAchievementOverlay(
             child = child,
