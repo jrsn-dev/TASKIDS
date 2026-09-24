@@ -8,14 +8,9 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,12 +20,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.AssetBitmapImage
 import com.example.ui.design.TaskIdsColors
 import java.io.File
 import java.io.FileOutputStream
@@ -155,35 +154,40 @@ fun ParentLibraryContent(
         ParentLibraryCatalog.activities.filter { it.category == selectedCategory }
     }
 
-    Column(modifier = modifier) {
-        Text(
-            "Biblioteca para famílias",
-            color = TaskIdsColors.Ink,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Black
-        )
-        Text(
-            "Brincadeiras, atividades imprimíveis e materiais para usar em casa.",
-            color = TaskIdsColors.Muted,
-            fontSize = 13.sp
-        )
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFF8FBFF), Color(0xFFF4F6FF), Color(0xFFF9FAFF))
+                )
+            )
+            .padding(14.dp)
+    ) {
+        LibraryHero()
 
         Spacer(Modifier.height(14.dp))
 
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            categories.take(5).forEach { category ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState()),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            categories.forEach { category ->
+                val selected = selectedCategory == category
                 Text(
                     category,
-                    color = if (selectedCategory == category) Color.White else TaskIdsColors.Ink,
+                    color = if (selected) Color.White else TaskIdsColors.Ink,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .background(
-                            if (selectedCategory == category) TaskIdsColors.Blue else TaskIdsColors.SoftBg,
-                            RoundedCornerShape(16.dp)
+                            if (selected) TaskIdsColors.Ink else Color.White,
+                            RoundedCornerShape(18.dp)
                         )
                         .clickable { selectedCategory = category }
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 14.dp, vertical = 9.dp)
                 )
             }
         }
@@ -193,63 +197,195 @@ fun ParentLibraryContent(
             Text(
                 message!!,
                 color = TaskIdsColors.Green,
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
         Spacer(Modifier.height(12.dp))
 
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        LazyColumn(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(bottom = 20.dp)
+        ) {
             items(visible) { activity ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(Color.White, RoundedCornerShape(20.dp))
-                        .padding(16.dp)
-                ) {
-                    Row {
-                        Column(Modifier.weight(1f)) {
-                            Text(
-                                activity.category.uppercase(),
-                                color = TaskIdsColors.Blue,
-                                fontSize = 9.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            Text(
-                                activity.title,
-                                color = TaskIdsColors.Ink,
-                                fontSize = 17.sp,
-                                fontWeight = FontWeight.Black
-                            )
-                            Text(
-                                "${activity.age} • ${activity.duration}",
-                                color = TaskIdsColors.Muted,
-                                fontSize = 11.sp
-                            )
-                        }
-                        Spacer(Modifier.width(10.dp))
-                        Text(
-                            "BAIXAR PDF",
-                            color = Color.White,
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Black,
-                            modifier = Modifier
-                                .background(TaskIdsColors.Purple, RoundedCornerShape(14.dp))
-                                .clickable {
-                                    val result = LibraryPdfGenerator.saveToDownloads(context, activity)
-                                    message = result.fold(
-                                        onSuccess = { "PDF salvo em Downloads/TASKIDS: $it" },
-                                        onFailure = { "Não foi possível gerar o PDF: ${it.message ?: "erro"}" }
-                                    )
-                                }
-                                .padding(horizontal = 12.dp, vertical = 10.dp)
+                LibraryActivityCard(
+                    activity = activity,
+                    useGirl = ParentLibraryCatalog.activities.indexOf(activity) % 2 == 0,
+                    onDownload = {
+                        val result = LibraryPdfGenerator.saveToDownloads(context, activity)
+                        message = result.fold(
+                            onSuccess = { "PDF salvo em Downloads/TASKIDS: $it" },
+                            onFailure = { "Não foi possível gerar o PDF: ${it.message ?: "erro"}" }
                         )
                     }
+                )
+            }
+        }
+    }
+}
 
-                    Spacer(Modifier.height(8.dp))
-                    Text(activity.summary, color = TaskIdsColors.Muted, fontSize = 12.sp)
-                }
+@Composable
+private fun LibraryHero() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(190.dp)
+            .shadow(10.dp, RoundedCornerShape(28.dp))
+            .background(
+                Brush.linearGradient(
+                    listOf(Color.White, Color(0xFFEAF5FF), Color(0xFFF1ECFF))
+                ),
+                RoundedCornerShape(28.dp)
+            )
+            .padding(start = 22.dp, top = 18.dp, bottom = 18.dp, end = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                "Biblioteca para famílias",
+                color = TaskIdsColors.Ink,
+                fontSize = 25.sp,
+                lineHeight = 27.sp,
+                fontWeight = FontWeight.Black
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Brincadeiras, atividades e materiais para transformar momentos simples em experiências especiais.",
+                color = TaskIdsColors.Muted,
+                fontSize = 12.sp,
+                lineHeight = 17.sp
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .width(210.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AssetBitmapImage(
+                assetName = "avatar_boy_base.png",
+                contentDescription = null,
+                modifier = Modifier
+                    .width(105.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.BottomStart)
+            )
+            AssetBitmapImage(
+                assetName = "avatar_girl_base.png",
+                contentDescription = null,
+                modifier = Modifier
+                    .width(110.dp)
+                    .fillMaxHeight()
+                    .align(Alignment.BottomEnd)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LibraryActivityCard(
+    activity: LibraryActivity,
+    useGirl: Boolean,
+    onDownload: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(165.dp)
+            .shadow(7.dp, RoundedCornerShape(24.dp))
+            .background(Color.White, RoundedCornerShape(24.dp))
+    ) {
+        Box(
+            modifier = Modifier
+                .width(135.dp)
+                .fillMaxHeight()
+                .background(
+                    Brush.verticalGradient(
+                        if (useGirl) {
+                            listOf(Color(0xFFFFEEF5), Color(0xFFF0ECFF))
+                        } else {
+                            listOf(Color(0xFFEAF5FF), Color(0xFFE9F8F2))
+                        }
+                    ),
+                    RoundedCornerShape(topStart = 24.dp, bottomStart = 24.dp)
+                ),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            AssetBitmapImage(
+                assetName = if (useGirl) "avatar_girl_base.png" else "avatar_boy_base.png",
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(top = 8.dp, start = 6.dp, end = 6.dp)
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
+                .padding(16.dp)
+        ) {
+            Text(
+                activity.category.uppercase(),
+                color = TaskIdsColors.Purple,
+                fontSize = 9.sp,
+                fontWeight = FontWeight.Black
+            )
+
+            Spacer(Modifier.height(2.dp))
+
+            Text(
+                activity.title,
+                color = TaskIdsColors.Ink,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black
+            )
+
+            Text(
+                "${activity.age} • ${activity.duration}",
+                color = TaskIdsColors.Muted,
+                fontSize = 10.sp
+            )
+
+            Spacer(Modifier.height(7.dp))
+
+            Text(
+                activity.summary,
+                color = TaskIdsColors.Muted,
+                fontSize = 11.sp,
+                lineHeight = 15.sp,
+                maxLines = 2
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    "${activity.materials.size} materiais",
+                    color = TaskIdsColors.Muted,
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Spacer(Modifier.weight(1f))
+                Text(
+                    "BAIXAR PDF",
+                    color = Color.White,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Black,
+                    modifier = Modifier
+                        .background(TaskIdsColors.Ink, RoundedCornerShape(14.dp))
+                        .clickable(onClick = onDownload)
+                        .padding(horizontal = 13.dp, vertical = 9.dp)
+                )
             }
         }
     }
