@@ -9,12 +9,14 @@ import android.provider.MediaStore
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -26,12 +28,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.game.GameIcon
 import java.io.File
 import java.io.FileOutputStream
 
@@ -208,7 +212,25 @@ fun ParentLibraryContent(
                         .background(Color.White, RoundedCornerShape(20.dp))
                         .padding(16.dp)
                 ) {
-                    Row {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val artColor = when (activity.category) {
+                            "Brincadeira" -> TaskIdsColors.Pink
+                            "Rotina" -> TaskIdsColors.Blue
+                            "Emoções" -> TaskIdsColors.Purple
+                            "Movimento" -> TaskIdsColors.Green
+                            else -> TaskIdsColors.Orange
+                        }
+                        val artKey = when (activity.category) {
+                            "Brincadeira" -> "TOYS"
+                            "Rotina", "Autonomia" -> "HOMEWORK"
+                            "Movimento" -> "SPORT"
+                            else -> "BOOK"
+                        }
+                        Box(Modifier.size(74.dp).background(artColor.copy(alpha = 0.14f),
+                            RoundedCornerShape(18.dp)), contentAlignment = Alignment.Center) {
+                            GameIcon(artKey, Modifier.size(53.dp), artColor)
+                        }
+                        Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
                             Text(
                                 activity.category.uppercase(),
@@ -228,6 +250,12 @@ fun ParentLibraryContent(
                                 fontSize = 11.sp
                             )
                         }
+                    }
+
+                    Spacer(Modifier.height(10.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(activity.summary, color = TaskIdsColors.Muted, fontSize = 12.sp,
+                            modifier = Modifier.weight(1f), maxLines = 2)
                         Spacer(Modifier.width(10.dp))
                         Text(
                             "BAIXAR PDF",
@@ -247,8 +275,6 @@ fun ParentLibraryContent(
                         )
                     }
 
-                    Spacer(Modifier.height(8.dp))
-                    Text(activity.summary, color = TaskIdsColors.Muted, fontSize = 12.sp)
                 }
             }
         }
