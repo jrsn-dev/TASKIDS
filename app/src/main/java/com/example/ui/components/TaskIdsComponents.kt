@@ -27,10 +27,24 @@ import com.example.model.Child
 import com.example.ui.design.TaskIdsColors
 
 @Composable
+fun TaskIdsWordmark() {
+    val colors = listOf(
+        TaskIdsColors.Blue, TaskIdsColors.Orange, TaskIdsColors.Green,
+        TaskIdsColors.Purple, TaskIdsColors.Yellow, TaskIdsColors.Blue,
+        TaskIdsColors.Purple
+    )
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        "TASKIDS".forEachIndexed { index, letter ->
+            Text(letter.toString(), color = colors[index], fontSize = 26.sp, fontWeight = FontWeight.Black)
+        }
+    }
+}
+
+@Composable
 fun Modifier.taskIdsFocus(
     isFocused: Boolean,
     shape: RoundedCornerShape = RoundedCornerShape(20.dp),
-    focusColor: Color = Color.White
+    focusColor: Color = TaskIdsColors.Blue
 ): Modifier {
     val scale by animateFloatAsState(if (isFocused) 1.05f else 1f, label = "focus-scale")
     return graphicsLayer {
@@ -38,7 +52,7 @@ fun Modifier.taskIdsFocus(
         scaleY = scale
     }.border(
         width = if (isFocused) 3.dp else 1.dp,
-        color = if (isFocused) focusColor else Color.White.copy(alpha = 0.12f),
+        color = if (isFocused) focusColor else TaskIdsColors.Blue.copy(alpha = 0.10f),
         shape = shape
     )
 }

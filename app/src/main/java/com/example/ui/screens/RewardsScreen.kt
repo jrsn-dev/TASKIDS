@@ -22,7 +22,7 @@ import com.example.ui.components.PrimaryTvButton
 import com.example.ui.components.StarPill
 import com.example.ui.components.taskIdsFocus
 import com.example.ui.design.TaskIdsColors
-import com.example.ui.game.RewardVectorIcon
+import com.example.ui.game.RewardArt
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
@@ -40,20 +40,20 @@ fun RewardsScreen(viewModel: MainViewModel) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             PrimaryTvButton(
                 text = "← Início",
-                background = Color.White.copy(alpha = 0.12f),
+                background = TaskIdsColors.Blue,
                 onClick = { viewModel.navigateTo(AppScreen.Home) }
             )
             Spacer(Modifier.width(18.dp))
             Column {
                 Text(
                     "Recompensas",
-                    color = Color.White,
+                    color = TaskIdsColors.Ink,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Black
                 )
                 Text(
                     "Troque estrelas por experiências aprovadas pela família.",
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = TaskIdsColors.Muted,
                     fontSize = 14.sp
                 )
             }
@@ -67,10 +67,10 @@ fun RewardsScreen(viewModel: MainViewModel) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White.copy(alpha = 0.10f), RoundedCornerShape(18.dp))
+                    .background(Color.White, RoundedCornerShape(18.dp))
                     .padding(14.dp)
             ) {
-                Text(message ?: "", color = Color.White, fontWeight = FontWeight.Bold)
+                Text(message ?: "", color = TaskIdsColors.Ink, fontWeight = FontWeight.Bold)
             }
             Spacer(Modifier.height(14.dp))
         }
@@ -94,12 +94,12 @@ fun RewardsScreen(viewModel: MainViewModel) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                .background(Color.White, RoundedCornerShape(20.dp))
                 .padding(16.dp)
         ) {
             Text(
                 "Tempo de tela não abre um navegador livre. A experiência permanece dentro da área controlada do TASKIDS.",
-                color = Color.White.copy(alpha = 0.78f),
+                color = TaskIdsColors.Muted,
                 fontSize = 13.sp
             )
         }
@@ -128,15 +128,11 @@ private fun RewardCard(
     ) {
         Box(
             modifier = Modifier
-                .size(86.dp)
+                .size(112.dp)
                 .background(TaskIdsColors.SoftBlue, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            RewardVectorIcon(
-                type = reward.type,
-                modifier = Modifier.size(48.dp),
-                tint = TaskIdsColors.Blue
-            )
+            RewardArt(type = reward.type, modifier = Modifier.size(82.dp))
         }
 
         Spacer(Modifier.height(15.dp))
@@ -178,7 +174,7 @@ private fun RewardCard(
         ) {
             Text(
                 if (canRedeem) "Desbloquear" else "Junte mais estrelas",
-                color = Color.White,
+                color = TaskIdsColors.Ink,
                 fontWeight = FontWeight.Black,
                 fontSize = 13.sp
             )

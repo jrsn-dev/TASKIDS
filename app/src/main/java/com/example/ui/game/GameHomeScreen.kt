@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,6 +19,8 @@ import com.example.game.GameThemeKey
 import com.example.model.Child
 import com.example.model.TaskStatus
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.components.TaskIdsWordmark
+import com.example.ui.components.taskIdsFocus
 import com.example.ui.dialogs.ParentPinDialog
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
@@ -98,7 +101,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(
-                                    TaskIdsColors.Green.copy(alpha = 0.28f),
+                                    TaskIdsColors.Green.copy(alpha = 0.20f),
                                     RoundedCornerShape(22.dp)
                                 )
                                 .padding(18.dp),
@@ -106,7 +109,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                         ) {
                             Text(
                                 "Jornada completa por hoje",
-                                color = Color.White,
+                                color = TaskIdsColors.Ink,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 18.sp
                             )
@@ -120,7 +123,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                             .fillMaxWidth()
                             .weight(1f)
                             .background(
-                                Color.Black.copy(alpha = 0.10f),
+                                Color.White.copy(alpha = 0.95f),
                                 RoundedCornerShape(28.dp)
                             )
                             .padding(14.dp)
@@ -140,7 +143,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                     ) {
                         Text(
                             "${completed} de ${activeTasks.size} missões concluídas",
-                            color = Color.White.copy(alpha = 0.78f),
+                            color = TaskIdsColors.Muted,
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -150,7 +153,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
                         Box(
                             modifier = Modifier
                                 .background(
-                                    Color.White.copy(alpha = 0.12f),
+                                    TaskIdsColors.Purple,
                                     RoundedCornerShape(16.dp)
                                 )
                                 .clickable { viewModel.navigateTo(AppScreen.Rewards) }
@@ -195,12 +198,7 @@ private fun GameHomeTopBar(
         Row(verticalAlignment = Alignment.CenterVertically) {
             StarIcon(Modifier.size(28.dp))
             Spacer(Modifier.width(8.dp))
-            Text(
-                "TASKIDS",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black
-            )
+            TaskIdsWordmark()
         }
 
         Spacer(Modifier.weight(1f))
@@ -211,8 +209,8 @@ private fun GameHomeTopBar(
                 Box(
                     modifier = Modifier
                         .background(
-                            if (selected) Color.White.copy(alpha = 0.18f)
-                            else Color.Black.copy(alpha = 0.10f),
+                            if (selected) Color.White
+                            else Color.White.copy(alpha = 0.72f),
                             RoundedCornerShape(16.dp)
                         )
                         .clickable { onSelectProfile(profile.id) }
@@ -220,7 +218,7 @@ private fun GameHomeTopBar(
                 ) {
                     Text(
                         profile.name,
-                        color = Color.White,
+                        color = TaskIdsColors.Ink,
                         fontSize = 11.sp,
                         fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold
                     )
@@ -232,7 +230,7 @@ private fun GameHomeTopBar(
 
         Box(
             modifier = Modifier
-                .background(Color.Black.copy(alpha = 0.16f), RoundedCornerShape(16.dp))
+                .background(TaskIdsColors.Blue, RoundedCornerShape(16.dp))
                 .clickable(onClick = onParents)
                 .padding(horizontal = 15.dp, vertical = 9.dp)
         ) {
@@ -256,7 +254,7 @@ private fun PlayerSummaryCard(
     Column(
         modifier = modifier
             .background(
-                Color.Black.copy(alpha = 0.14f),
+                Color.White.copy(alpha = 0.94f),
                 RoundedCornerShape(28.dp)
             )
             .padding(20.dp),
@@ -264,7 +262,7 @@ private fun PlayerSummaryCard(
     ) {
         Text(
             "OLÁ, ${child.name.uppercase()}",
-            color = Color.White.copy(alpha = 0.68f),
+            color = TaskIdsColors.Muted,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black
         )
@@ -273,7 +271,7 @@ private fun PlayerSummaryCard(
 
         Text(
             levelTitle,
-            color = Color.White,
+            color = TaskIdsColors.Ink,
             fontSize = 21.sp,
             fontWeight = FontWeight.Black
         )
@@ -318,7 +316,7 @@ private fun PlayerSummaryCard(
 
         Text(
             "NÍVEL $levelNumber",
-            color = TaskIdsColors.Yellow,
+            color = TaskIdsColors.Blue,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black
         )
@@ -339,13 +337,13 @@ private fun JourneyHeader(
         Column {
             Text(
                 "Jornada de hoje",
-                color = Color.White,
+                color = TaskIdsColors.Ink,
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
                 "Escolha a próxima missão e avance pelo mapa.",
-                color = Color.White.copy(alpha = 0.68f),
+                color = TaskIdsColors.Muted,
                 fontSize = 12.sp
             )
         }
@@ -381,20 +379,20 @@ private fun CompactHomeStat(
     Column(
         modifier = Modifier
             .width(92.dp)
-            .background(Color.Black.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
+            .background(Color.White, RoundedCornerShape(18.dp))
             .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
         Box(Modifier.size(7.dp).background(accent, CircleShape))
         Spacer(Modifier.height(4.dp))
         Text(
             value,
-            color = Color.White,
+            color = TaskIdsColors.Ink,
             fontSize = 16.sp,
             fontWeight = FontWeight.Black
         )
         Text(
             label,
-            color = Color.White.copy(alpha = 0.58f),
+            color = TaskIdsColors.Muted,
             fontSize = 8.sp,
             fontWeight = FontWeight.Bold
         )
@@ -410,10 +408,13 @@ private fun NextMissionCard(
     xp: Int,
     onClick: () -> Unit
 ) {
+    var focused by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(24.dp))
+            .onFocusChanged { focused = it.isFocused }
+            .taskIdsFocus(focused, RoundedCornerShape(24.dp), TaskIdsColors.Blue)
+            .background(Color.White, RoundedCornerShape(24.dp))
             .clickable(onClick = onClick)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -436,19 +437,19 @@ private fun NextMissionCard(
         Column(Modifier.weight(1f)) {
             Text(
                 "PRÓXIMA MISSÃO",
-                color = Color.White.copy(alpha = 0.56f),
+                color = TaskIdsColors.Muted,
                 fontSize = 9.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
                 taskTitle,
-                color = Color.White,
+                color = TaskIdsColors.Ink,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Black
             )
             Text(
                 "$duration min  •  +$stars estrelas  •  +$xp XP",
-                color = Color.White.copy(alpha = 0.74f),
+                color = TaskIdsColors.Muted,
                 fontSize = 11.sp
             )
         }

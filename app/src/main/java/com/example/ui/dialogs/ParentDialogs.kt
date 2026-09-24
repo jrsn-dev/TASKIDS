@@ -35,7 +35,7 @@ fun ParentPinDialog(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.78f)),
+            .background(TaskIdsColors.SoftBlue.copy(alpha = 0.96f)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -47,7 +47,7 @@ fun ParentPinDialog(
                 .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("🔒", fontSize = 36.sp)
+            Text("★", color = TaskIdsColors.Yellow, fontSize = 42.sp, fontWeight = FontWeight.Black)
             Spacer(Modifier.height(10.dp))
             Text(
                 "Área dos Pais",
@@ -68,7 +68,7 @@ fun ParentPinDialog(
                 repeat(4) { index ->
                     Box(
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(22.dp)
                             .background(
                                 if (index < entered.length) TaskIdsColors.Blue else Color(0xFFDCE5F2),
                                 CircleShape
@@ -86,7 +86,7 @@ fun ParentPinDialog(
                         Box(
                             modifier = Modifier
                                 .size(68.dp, 52.dp)
-                                .background(TaskIdsColors.SoftBg, RoundedCornerShape(14.dp))
+                                .background(TaskIdsColors.SoftBg, RoundedCornerShape(18.dp))
                                 .clickable {
                                     when (key) {
                                         "⌫" -> if (entered.isNotEmpty()) entered = entered.dropLast(1)

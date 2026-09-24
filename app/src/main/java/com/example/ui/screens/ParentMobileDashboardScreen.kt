@@ -83,12 +83,12 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
                 Text(
                     text = item.label,
                     color = if (selected) Color.White else TaskIdsColors.Ink,
-                    fontSize = 11.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Black,
                     modifier = Modifier
                         .background(
-                            if (selected) TaskIdsColors.Blue else Color.White,
-                            RoundedCornerShape(18.dp)
+                            if (selected) TaskIdsColors.Blue else TaskIdsColors.SoftBlue,
+                            RoundedCornerShape(22.dp)
                         )
                         .clickable { section = item }
                         .padding(horizontal = 14.dp, vertical = 9.dp)
@@ -242,13 +242,13 @@ private fun MobileParentHeader(child: Child?, onExit: () -> Unit) {
             Text(
                 child?.name ?: "TASKIDS",
                 color = TaskIdsColors.Muted,
-                fontSize = 11.sp
+                fontSize = 13.sp
             )
         }
         Text(
             "SAIR",
             color = Color.White,
-            fontSize = 11.sp,
+            fontSize = 13.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier
                 .background(TaskIdsColors.Ink, RoundedCornerShape(14.dp))
@@ -282,7 +282,7 @@ private fun MobileOverview(
             Text(
                 "Acompanhe o progresso e gerencie a jornada da criança.",
                 color = TaskIdsColors.Muted,
-                fontSize = 12.sp
+                fontSize = 14.sp
             )
         }
 
@@ -308,15 +308,15 @@ private fun MobileOverview(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(20.dp))
+                    .background(Color.White, RoundedCornerShape(24.dp))
                     .padding(16.dp)
             ) {
                 Text("Resumo do perfil", color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
                 Spacer(Modifier.height(8.dp))
-                Text("Rotinas: ${routines.size}", color = TaskIdsColors.Muted, fontSize = 12.sp)
-                Text("Recompensas: ${rewards.size}", color = TaskIdsColors.Muted, fontSize = 12.sp)
-                Text("Sequência atual: ${child?.currentStreak ?: 0} dias", color = TaskIdsColors.Muted, fontSize = 12.sp)
-                Text("Melhor combo: x${child?.bestCombo ?: 0}", color = TaskIdsColors.Muted, fontSize = 12.sp)
+                Text("Rotinas: ${routines.size}", color = TaskIdsColors.Muted, fontSize = 14.sp)
+                Text("Recompensas: ${rewards.size}", color = TaskIdsColors.Muted, fontSize = 14.sp)
+                Text("Sequência atual: ${child?.currentStreak ?: 0} dias", color = TaskIdsColors.Muted, fontSize = 14.sp)
+                Text("Melhor combo: x${child?.bestCombo ?: 0}", color = TaskIdsColors.Muted, fontSize = 14.sp)
             }
         }
     }
@@ -326,7 +326,7 @@ private fun MobileOverview(
 private fun MobileMetric(label: String, value: String, accent: Color, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
-            .background(Color.White, RoundedCornerShape(18.dp))
+            .background(Color.White, RoundedCornerShape(22.dp))
             .padding(14.dp)
     ) {
         Box(Modifier.size(8.dp).background(accent, CircleShape))
@@ -344,7 +344,7 @@ private fun QuickAction(text: String, color: Color, modifier: Modifier = Modifie
         fontSize = 10.sp,
         fontWeight = FontWeight.Black,
         modifier = modifier
-            .background(color, RoundedCornerShape(18.dp))
+            .background(color, RoundedCornerShape(22.dp))
             .clickable(onClick = onClick)
             .padding(16.dp)
     )
@@ -366,7 +366,7 @@ private fun MobileChildren(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(20.dp))
+                    .background(Color.White, RoundedCornerShape(24.dp))
                     .clickable { onSelect(profile) }
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -375,8 +375,8 @@ private fun MobileChildren(
                 Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
                     Text(profile.name, color = TaskIdsColors.Ink, fontSize = 17.sp, fontWeight = FontWeight.Black)
-                    Text("${profile.totalStars} estrelas • ${profile.totalXp} XP", color = TaskIdsColors.Muted, fontSize = 11.sp)
-                    Text("Sequência: ${profile.currentStreak} dias", color = TaskIdsColors.Muted, fontSize = 11.sp)
+                    Text("${profile.totalStars} estrelas • ${profile.totalXp} XP", color = TaskIdsColors.Muted, fontSize = 13.sp)
+                    Text("Sequência: ${profile.currentStreak} dias", color = TaskIdsColors.Muted, fontSize = 13.sp)
                 }
                 if (profile.id == currentId) {
                     Text("ATIVO", color = TaskIdsColors.Blue, fontWeight = FontWeight.Black, fontSize = 10.sp)
@@ -402,7 +402,7 @@ private fun MobileMissions(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(18.dp))
+                    .background(Color.White, RoundedCornerShape(22.dp))
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -450,14 +450,14 @@ private fun MobileRoutines(routines: List<Routine>, onAdd: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(18.dp))
+                    .background(Color.White, RoundedCornerShape(22.dp))
                     .padding(14.dp)
             ) {
                 Text(routine.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
                 Text(
                     "Horário: ${routine.startTime ?: "livre"} • Dias: ${routine.daysCsv}",
                     color = TaskIdsColors.Muted,
-                    fontSize = 11.sp
+                    fontSize = 13.sp
                 )
             }
         }
@@ -475,13 +475,13 @@ private fun MobileRewards(rewards: List<Reward>, onAdd: () -> Unit) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(18.dp))
+                    .background(Color.White, RoundedCornerShape(22.dp))
                     .padding(14.dp)
             ) {
                 Text(reward.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
-                Text("${reward.costStars} estrelas", color = TaskIdsColors.Orange, fontWeight = FontWeight.Bold, fontSize = 11.sp)
+                Text("${reward.costStars} estrelas", color = TaskIdsColors.Orange, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 if (reward.description.isNotBlank()) {
-                    Text(reward.description, color = TaskIdsColors.Muted, fontSize = 11.sp)
+                    Text(reward.description, color = TaskIdsColors.Muted, fontSize = 13.sp)
                 }
             }
         }
@@ -511,7 +511,7 @@ private fun MobileReports(child: Child?, executions: List<String>) {
                 Text(
                     line,
                     color = TaskIdsColors.Ink,
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White, RoundedCornerShape(16.dp))
@@ -540,11 +540,11 @@ private fun MobileSettings(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(20.dp))
+                    .background(Color.White, RoundedCornerShape(24.dp))
                     .padding(16.dp)
             ) {
                 Text("PIN parental", color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
-                Text("O PIN padrão inicial é 0000.", color = TaskIdsColors.Muted, fontSize = 11.sp)
+                Text("O PIN padrão inicial é 0000.", color = TaskIdsColors.Muted, fontSize = 13.sp)
                 Spacer(Modifier.height(8.dp))
                 OutlinedTextField(
                     value = pin,
@@ -565,7 +565,7 @@ private fun MobileSettings(
                 }
                 if (pinMessage.isNotBlank()) {
                     Spacer(Modifier.height(6.dp))
-                    Text(pinMessage, color = TaskIdsColors.Muted, fontSize = 11.sp)
+                    Text(pinMessage, color = TaskIdsColors.Muted, fontSize = 13.sp)
                 }
             }
         }
@@ -581,11 +581,11 @@ private fun MobileSettings(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(20.dp))
+                    .background(Color.White, RoundedCornerShape(24.dp))
                     .padding(16.dp)
             ) {
                 Text("Personagem", color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
-                Text("Escolha a base visual do perfil infantil.", color = TaskIdsColors.Muted, fontSize = 11.sp)
+                Text("Escolha a base visual do perfil infantil.", color = TaskIdsColors.Muted, fontSize = 13.sp)
                 Spacer(Modifier.height(10.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("BOY" to "MENINO", "GIRL" to "MENINA").forEach { (key, label) ->
@@ -622,13 +622,13 @@ private fun SettingsRow(title: String, detail: String, action: String, onClick: 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White, RoundedCornerShape(20.dp))
+            .background(Color.White, RoundedCornerShape(24.dp))
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(Modifier.weight(1f)) {
             Text(title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
-            Text(detail, color = TaskIdsColors.Muted, fontSize = 11.sp)
+            Text(detail, color = TaskIdsColors.Muted, fontSize = 13.sp)
         }
         ActionButton(action, TaskIdsColors.Ink, onClick)
     }
@@ -637,7 +637,7 @@ private fun SettingsRow(title: String, detail: String, action: String, onClick: 
 @Composable
 private fun SectionTitle(title: String, subtitle: String) {
     Text(title, color = TaskIdsColors.Ink, fontSize = 24.sp, fontWeight = FontWeight.Black)
-    Text(subtitle, color = TaskIdsColors.Muted, fontSize = 12.sp)
+    Text(subtitle, color = TaskIdsColors.Muted, fontSize = 14.sp)
     Spacer(Modifier.height(8.dp))
 }
 

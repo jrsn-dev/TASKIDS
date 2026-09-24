@@ -34,7 +34,7 @@ fun AdventureMap(
 
     Box(
         modifier = modifier
-            .background(Color.White.copy(alpha = 0.07f), RoundedCornerShape(28.dp))
+            .background(TaskIdsColors.SoftBg, RoundedCornerShape(28.dp))
             .padding(18.dp)
     ) {
         Canvas(Modifier.fillMaxSize()) {
@@ -51,7 +51,7 @@ fun AdventureMap(
             }
             drawPath(
                 path,
-                color = Color.White.copy(alpha = 0.18f),
+                color = TaskIdsColors.Blue.copy(alpha = 0.22f),
                 style = Stroke(width = 10f, cap = StrokeCap.Round)
             )
             visible.forEachIndexed { index, task ->
@@ -96,7 +96,7 @@ fun AdventureMap(
                                 when {
                                     completed -> TaskIdsColors.Green
                                     active -> TaskIdsColors.Yellow
-                                    else -> Color(0xFF60708D)
+                                    else -> Color(0xFFCBD5E6)
                                 },
                                 CircleShape
                             )
@@ -129,7 +129,7 @@ fun AdventureMap(
                             locked -> "Bloqueada"
                             else -> task.title
                         },
-                        color = if (active) TaskIdsColors.Yellow else Color.White,
+                        color = if (active) TaskIdsColors.Blue else TaskIdsColors.Ink,
                         fontWeight = if (active) FontWeight.Black else FontWeight.Bold,
                         fontSize = 12.sp,
                         textAlign = TextAlign.Center,
@@ -139,7 +139,7 @@ fun AdventureMap(
                         Spacer(Modifier.height(4.dp))
                         Text(
                             "+${task.rewardXp} XP",
-                            color = Color.White.copy(alpha = 0.72f),
+                            color = TaskIdsColors.Muted,
                             fontSize = 10.sp
                         )
                     }
