@@ -232,11 +232,11 @@ class MainViewModel(
         _currentScreen.value = screen
     }
 
-    fun selectChild(childId: Long) {
+    fun selectChild(childId: Long, navigateHome: Boolean = true) {
         prefs.selectedChildId = childId
         _selectedChildId.value = childId
         _lastRewardMessage.value = null
-        navigateTo(AppScreen.Home)
+        if (navigateHome) navigateTo(AppScreen.Home)
     }
 
     fun selectTask(task: Task) {

@@ -187,7 +187,7 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                     ParentSection.PROFILES -> ProfilesSection(
                         children = children,
                         currentId = child?.id,
-                        onSelect = { viewModel.selectChild(it.id) },
+                        onSelect = { viewModel.selectChild(it.id, navigateHome = false) },
                         onAdd = { showAddProfile = true },
                         onEdit = { editingChild = it },
                         onDelete = viewModel::deleteChild
