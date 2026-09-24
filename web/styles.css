@@ -74,13 +74,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   letter-spacing: -1.4px;
 }
 
-.brand-task { color: #2389f5; }
-.brand-kids {
-  background: linear-gradient(105deg, #6555ef 0%, #ffbd31 68%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
+.brand img { width: 132px; height: auto; }
 
 .nav-links {
   display: flex;
@@ -336,13 +330,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .app-top { justify-content: space-between; }
 
 .mini-brand {
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 900;
-  letter-spacing: -.6px;
+  width: 68px;
+  height: auto;
 }
-.mini-brand b { color: #2f98ff; }
-.mini-brand em { color: #7356ef; font-style: normal; }
 
 .coin {
   padding: 6px 9px;
@@ -843,6 +833,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   font-weight: 950;
   letter-spacing: -1px;
 }
+.paper-logo img { width: 90px; height: auto; }
 
 .maze {
   margin-top: 65px;
