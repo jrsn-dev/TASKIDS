@@ -196,7 +196,7 @@ private fun GameHomeTopBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            StarIcon(Modifier.size(28.dp))
+            MascotStar(Modifier.size(36.dp))
             Spacer(Modifier.width(8.dp))
             TaskIdsWordmark()
         }

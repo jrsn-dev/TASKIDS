@@ -77,6 +77,8 @@ fun MissionCompleteScreen(viewModel: MainViewModel) {
             ) {
                 Spacer(Modifier.weight(1f))
 
+                MascotStar(Modifier.size(70.dp))
+
                 GameAvatar(
                     child = current,
                     celebrate = true,
