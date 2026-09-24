@@ -24,6 +24,7 @@ import com.example.model.Routine
 import com.example.model.Task
 import com.example.ui.components.MetricCard
 import com.example.ui.components.PrimaryTvButton
+import com.example.ui.components.TaskIdsWordmark
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.dialogs.AddTaskDialog
 import com.example.ui.game.GameAvatar
@@ -84,16 +85,7 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                     .background(Color.White, RoundedCornerShape(topStart = 32.dp, bottomStart = 32.dp))
                     .padding(20.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("⭐", fontSize = 28.sp)
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        "TASKIDS",
-                        color = TaskIdsColors.Ink,
-                        fontSize = 23.sp,
-                        fontWeight = FontWeight.Black
-                    )
-                }
+                TaskIdsWordmark()
 
                 Spacer(Modifier.height(8.dp))
                 Text(

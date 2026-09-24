@@ -1,6 +1,7 @@
 package com.example.ui.components
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,25 +20,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.model.Child
+import com.example.R
 import com.example.ui.design.TaskIdsColors
 
 @Composable
-fun TaskIdsWordmark() {
-    val colors = listOf(
-        TaskIdsColors.Blue, TaskIdsColors.Orange, TaskIdsColors.Green,
-        TaskIdsColors.Purple, TaskIdsColors.Yellow, TaskIdsColors.Blue,
-        TaskIdsColors.Purple
+fun TaskIdsWordmark(modifier: Modifier = Modifier) {
+    Image(
+        painter = painterResource(R.drawable.taskids_logo_original),
+        contentDescription = "TASKIDS",
+        modifier = modifier.width(125.dp).height(30.dp),
+        contentScale = ContentScale.Fit
     )
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        "TASKIDS".forEachIndexed { index, letter ->
-            Text(letter.toString(), color = colors[index], fontSize = 26.sp, fontWeight = FontWeight.Black)
-        }
-    }
 }
 
 @Composable

@@ -3,6 +3,8 @@ package com.example.ui.library
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Paint
+import android.graphics.BitmapFactory
+import android.graphics.RectF
 import android.graphics.pdf.PdfDocument
 import android.os.Build
 import android.provider.MediaStore
@@ -35,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.design.TaskIdsColors
+import com.example.R
 import com.example.ui.game.GameIcon
 import java.io.File
 import java.io.FileOutputStream
@@ -310,8 +313,10 @@ object LibraryPdfGenerator {
         }
 
         var y = 60f
-        canvas.drawText("TASKIDS", 48f, y, titlePaint)
-        y += 42f
+        val logo = BitmapFactory.decodeResource(context.resources, R.drawable.taskids_logo_original)
+        canvas.drawBitmap(logo, null, RectF(48f, 35f, 238f, 79f), null)
+        logo.recycle()
+        y += 68f
         canvas.drawText(activity.title, 48f, y, titlePaint)
         y += 30f
         canvas.drawText("${activity.category}  •  ${activity.age}  •  ${activity.duration}", 48f, y, bodyPaint)
