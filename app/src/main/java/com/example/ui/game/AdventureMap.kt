@@ -1,20 +1,16 @@
 package com.example.ui.game
 
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,127 +20,54 @@ import com.example.model.TaskStatus
 import com.example.ui.design.TaskIdsColors
 
 @Composable
-fun AdventureMap(
-    tasks: List<Task>,
-    modifier: Modifier = Modifier,
-    onMissionClick: (Task) -> Unit
-) {
-    val visible = tasks.filter { it.isActive }.take(6)
-    val nextMissionId = visible.firstOrNull { it.status != TaskStatus.COMPLETED }?.id
-
-    Box(
-        modifier = modifier
-            .background(TaskIdsColors.SoftBg, RoundedCornerShape(28.dp))
-            .padding(18.dp)
-    ) {
-        Canvas(Modifier.fillMaxSize()) {
-            if (visible.size <= 1) return@Canvas
-            val left = size.width * 0.09f
-            val right = size.width * 0.91f
-            val step = (right - left) / (visible.size - 1)
-            val yBase = size.height * 0.48f
-            val path = Path()
-            visible.indices.forEach { index ->
-                val x = left + index * step
-                val y = yBase + if (index % 2 == 0) -size.height * 0.11f else size.height * 0.11f
-                if (index == 0) path.moveTo(x, y) else path.lineTo(x, y)
+fun AdventureMap(tasks: List<Task>, modifier: Modifier = Modifier, onMissionClick: (Task) -> Unit) {
+    val visible = tasks.filter { it.isActive }
+    val nextId = visible.firstOrNull { it.status != TaskStatus.COMPLETED }?.id
+    Column(modifier.background(Color.White, RoundedCornerShape(28.dp)).padding(14.dp)) {
+        Text("Escolha sua próxima aventura", color = TaskIdsColors.Ink,
+            fontSize = 18.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(12.dp))
+        if (visible.isEmpty()) {
+            Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                Text("Novas missões aparecerão aqui!", color = TaskIdsColors.Muted)
             }
-            drawPath(
-                path,
-                color = TaskIdsColors.Blue.copy(alpha = 0.22f),
-                style = Stroke(width = 10f, cap = StrokeCap.Round)
-            )
-            visible.forEachIndexed { index, task ->
-                if (task.status == TaskStatus.COMPLETED && index < visible.lastIndex) {
-                    val x1 = left + index * step
-                    val y1 = yBase + if (index % 2 == 0) -size.height * 0.11f else size.height * 0.11f
-                    val x2 = left + (index + 1) * step
-                    val y2 = yBase + if ((index + 1) % 2 == 0) -size.height * 0.11f else size.height * 0.11f
-                    drawLine(
-                        TaskIdsColors.Yellow,
-                        Offset(x1, y1),
-                        Offset(x2, y2),
-                        strokeWidth = 10f,
-                        cap = StrokeCap.Round
-                    )
-                }
-            }
-        }
-
-        Row(
-            modifier = Modifier.fillMaxSize(),
-            horizontalArrangement = Arrangement.SpaceAround,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            visible.forEachIndexed { index, task ->
-                val completed = task.status == TaskStatus.COMPLETED
-                val active = task.id == nextMissionId
-                val locked = !completed && !active && visible
-                    .take(index)
-                    .any { it.status != TaskStatus.COMPLETED }
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .width(116.dp)
-                        .offset(y = if (index % 2 == 0) (-28).dp else 28.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(if (active) 88.dp else 76.dp)
-                            .background(
-                                when {
-                                    completed -> TaskIdsColors.Green
-                                    active -> TaskIdsColors.Yellow
-                                    else -> Color(0xFFCBD5E6)
-                                },
-                                CircleShape
-                            )
-                            .clickable(enabled = !locked && !completed) { onMissionClick(task) },
-                        contentAlignment = Alignment.Center
+        } else {
+            LazyRow(Modifier.fillMaxSize(), horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically) {
+                itemsIndexed(visible, key = { _, task -> task.id }) { index, task ->
+                    val done = task.status == TaskStatus.COMPLETED
+                    val locked = !done && task.id != nextId && visible.take(index).any { it.status != TaskStatus.COMPLETED }
+                    Column(
+                        Modifier.width(164.dp).fillMaxHeight().background(
+                            when {
+                                done -> Color(0xFFEEFFF0)
+                                locked -> Color(0xFFF2F4FA)
+                                else -> Color(0xFFE9F5FF)
+                            }, RoundedCornerShape(22.dp))
+                            .clickable(enabled = !done && !locked) { onMissionClick(task) }
+                            .padding(13.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        GameIcon(
-                            key = task.iconKey,
-                            modifier = Modifier.size(if (active) 52.dp else 44.dp),
-                            tint = if (active) TaskIdsColors.Ink else Color.White
-                        )
-                        if (completed) {
-                            Box(
-                                Modifier
-                                    .align(Alignment.BottomEnd)
-                                    .size(25.dp)
-                                    .background(Color.White, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("✓", color = TaskIdsColors.Green, fontWeight = FontWeight.Black, fontSize = 14.sp)
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = when {
-                            completed -> "Concluída"
-                            active -> task.title
-                            locked -> "Bloqueada"
-                            else -> task.title
-                        },
-                        color = if (active) TaskIdsColors.Blue else TaskIdsColors.Ink,
-                        fontWeight = if (active) FontWeight.Black else FontWeight.Bold,
-                        fontSize = 12.sp,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2
-                    )
-                    if (active) {
+                        MissionCardArt(task.iconKey)
+                        Spacer(Modifier.height(8.dp))
+                        Text(task.title, color = TaskIdsColors.Ink, fontSize = 15.sp,
+                            fontWeight = FontWeight.Black, textAlign = TextAlign.Center, maxLines = 2)
                         Spacer(Modifier.height(4.dp))
-                        Text(
-                            "+${task.rewardXp} XP",
-                            color = TaskIdsColors.Muted,
-                            fontSize = 10.sp
-                        )
+                        Text(when { done -> "Concluída ✓"; locked -> "Em breve"; else -> "${task.durationMinutes} min  •  ★ ${task.rewardStars}" },
+                            color = if (done) TaskIdsColors.Green else TaskIdsColors.Muted,
+                            fontSize = 11.sp, textAlign = TextAlign.Center)
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun MissionCardArt(iconKey: String) {
+    Box(Modifier.size(76.dp).background(Color.White, RoundedCornerShape(20.dp)),
+        contentAlignment = Alignment.Center) {
+        GameIcon(iconKey, Modifier.size(52.dp), tint = TaskIdsColors.Blue)
     }
 }

@@ -1,7 +1,5 @@
 package com.example
 
-import android.app.Activity
-import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -13,11 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.navigation.AppScreen
@@ -53,17 +49,6 @@ class MainActivity : ComponentActivity() {
 @Composable
 private fun TaskIdsApp(viewModel: MainViewModel) {
     val screen by viewModel.currentScreen.collectAsState()
-    val context = LocalContext.current
-    val activity = context as? Activity
-
-    LaunchedEffect(screen) {
-        activity?.requestedOrientation = when (screen) {
-            AppScreen.Parent,
-            AppScreen.Reports -> ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            else -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-        }
-    }
-
     if (screen !is AppScreen.Home) {
         BackHandler {
             when (screen) {

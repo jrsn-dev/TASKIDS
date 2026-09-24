@@ -23,15 +23,27 @@ import com.example.ui.components.StarPill
 import com.example.ui.components.taskIdsFocus
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.game.RewardArt
+import com.example.ui.game.ChildMobileRewards
+import com.example.ui.game.GameWorldBackground
+import com.example.game.GameThemeKey
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
 @Composable
 fun RewardsScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) ChildMobileRewards(viewModel) else RewardsLandscape(viewModel)
+    }
+}
+
+@Composable
+private fun RewardsLandscape(viewModel: MainViewModel) {
     val rewards by viewModel.rewards.collectAsState()
     val child by viewModel.currentChild.collectAsState()
     val message by viewModel.lastRewardMessage.collectAsState()
 
+    Box(Modifier.fillMaxSize()) {
+    GameWorldBackground(GameThemeKey.from(child?.gameTheme ?: "SKY"), Modifier.fillMaxSize())
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -103,6 +115,7 @@ fun RewardsScreen(viewModel: MainViewModel) {
                 fontSize = 13.sp
             )
         }
+    }
     }
 }
 

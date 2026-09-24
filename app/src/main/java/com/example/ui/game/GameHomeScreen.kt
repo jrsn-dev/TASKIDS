@@ -27,6 +27,13 @@ import com.example.viewmodel.MainViewModel
 
 @Composable
 fun GameHomeScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) ChildMobileHome(viewModel) else GameHomeLandscape(viewModel)
+    }
+}
+
+@Composable
+private fun GameHomeLandscape(viewModel: MainViewModel) {
     val children by viewModel.children.collectAsState()
     val child by viewModel.currentChild.collectAsState()
     val tasks by viewModel.tasks.collectAsState()

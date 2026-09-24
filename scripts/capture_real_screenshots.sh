@@ -44,6 +44,11 @@ for node in root.iter("node"):
             x,y=(x1+x2)//2,(y1+y2)//2
             matches.append(((x-cx)**2+(y-cy)**2,x,y))
 if matches:
+    if target.isdigit():
+        matches.sort(key=lambda point: -point[2])
+        _,x,y=matches[0]
+        print(f"{x} {y}")
+        sys.exit(0)
     _,x,y=min(matches)
     print(f"{x} {y}")
     sys.exit(0)
@@ -101,6 +106,13 @@ adb logcat -d > real-screenshots/logcat.txt || true
 tap_text_optional "Wait"
 capture "01-home-game.png"
 
+tap_text "Missões" 10
+capture "01a-child-missions.png"
+tap_text "Início" 10
+tap_text "Recompensas" 10
+capture "01b-child-rewards.png"
+tap_text "Início" 10
+
 tap_text "PAIS" 15
 sleep 2
 capture "02-parent-pin.png"
@@ -113,17 +125,14 @@ sleep 5
 tap_text_optional "Wait"
 capture "03-parent-dashboard.png"
 
+tap_text "Mais" 10
 tap_text "Missões" 10
 sleep 2
 capture "04-parent-missions.png"
 
-adb shell input swipe 900 170 180 170 450 || true
+adb shell input swipe 900 312 170 312 450
 sleep 2
-if ! tap_text "Biblioteca" 6; then
-  adb shell input swipe 900 170 120 170 500 || true
-  sleep 2
-  tap_text "Biblioteca" 6
-fi
+tap_text "Biblioteca" 10
 sleep 2
 capture "05-parent-library.png"
 
