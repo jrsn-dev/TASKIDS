@@ -1,5 +1,5 @@
 name: Android real screenshots
-# Visual regression capture for real emulator output
+# Real emulator capture for image-first UI 1790248697016
 
 on:
   push:
@@ -72,7 +72,7 @@ jobs:
             # such as the star counter when looking for keypad digit "0".
             def area(item):
                 b=item[2]
-                m=re.match(r"\\[(\\d+),(\\d+)\\]\\[(\\d+),(\\d+)\\]", b)
+                m=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", b)
                 if not m: return 0
                 x1,y1,x2,y2=map(int,m.groups())
                 return max(0,x2-x1)*max(0,y2-y1)
@@ -94,11 +94,12 @@ jobs:
             sleep 5
             adb exec-out screencap -p > screenshots/03-dashboard-pais-mobile.png
 
-            python /tmp/tap_text.py Biblioteca
+            python /tmp/tap_text.py "ABRIR BIBLIOTECA"
             sleep 3
             adb exec-out screencap -p > screenshots/04-biblioteca.png
 
       - name: Upload real app screenshots
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: TASKIDS-real-screenshots
