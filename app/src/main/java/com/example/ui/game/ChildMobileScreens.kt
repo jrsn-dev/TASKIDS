@@ -57,13 +57,14 @@ private fun ChildBackdrop(child: Child?, content: @Composable BoxScope.() -> Uni
 
 @Composable
 private fun WhiteCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.background(Color.White.copy(alpha = 0.97f), cardShape).padding(18.dp), content = content)
+    Column(modifier.background(Color.White.copy(alpha = 0.97f), cardShape).padding(14.dp), content = content)
 }
 
 @Composable
 private fun BrandHeader(child: Child?, onParents: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        TaskIdsWordmark()
+        Box(Modifier.background(Color.White.copy(alpha = 0.82f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 5.dp, vertical = 2.dp)) { TaskIdsWordmark() }
         Spacer(Modifier.weight(1f))
         Row(
             Modifier.background(Color.White, CircleShape).padding(horizontal = 10.dp, vertical = 7.dp),
@@ -133,7 +134,7 @@ fun ChildMobileHome(viewModel: MainViewModel) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(13.dp)
+                verticalArrangement = Arrangement.spacedBy(9.dp)
             ) {
                 item { BrandHeader(current) { showPin = true } }
                 if (showMissions) {
@@ -146,21 +147,21 @@ fun ChildMobileHome(viewModel: MainViewModel) {
                     }
                 } else {
                     item {
-                        Row(Modifier.fillMaxWidth().height(194.dp), verticalAlignment = Alignment.Bottom) {
-                            Column(Modifier.weight(1f).padding(bottom = 15.dp)) {
-                                Text("Oi, ${current.name}!", color = navy, fontSize = 31.sp, fontWeight = FontWeight.Black)
-                                Text("Pronto para sua próxima conquista?", color = navy, fontSize = 18.sp, lineHeight = 22.sp)
+                        Row(Modifier.fillMaxWidth().height(147.dp), verticalAlignment = Alignment.Bottom) {
+                            Column(Modifier.weight(1f).padding(bottom = 8.dp)) {
+                                Text("Oi, ${current.name}!", color = navy, fontSize = 28.sp, fontWeight = FontWeight.Black)
+                                Text("Pronto para sua próxima conquista?", color = navy, fontSize = 16.sp, lineHeight = 19.sp)
                             }
-                            GameAvatar(current, Modifier.width(168.dp).fillMaxHeight())
+                            GameAvatar(current, Modifier.width(147.dp).fillMaxHeight())
                         }
                     }
                     item {
                         WhiteCard(Modifier.fillMaxWidth()) {
                             Text("Seu progresso de hoje", color = navy, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                            Spacer(Modifier.height(13.dp))
+                            Spacer(Modifier.height(9.dp))
                             LinearProgressIndicator({ progress }, Modifier.fillMaxWidth().height(13.dp).clip(CircleShape),
                                 color = TaskIdsColors.Green, trackColor = TaskIdsColors.SoftBlue)
-                            Spacer(Modifier.height(11.dp))
+                            Spacer(Modifier.height(7.dp))
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("$completed de ${active.size} missões concluídas", color = muted, fontSize = 13.sp)
                                 Text("${(progress * 100).toInt()}%", color = TaskIdsColors.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold)
@@ -207,8 +208,8 @@ fun ChildMobileHome(viewModel: MainViewModel) {
 @Composable
 private fun SmallMetric(icon: String, value: String, label: String, accent: Color, modifier: Modifier) {
     WhiteCard(modifier) {
-        Text(icon, color = accent, fontSize = 24.sp, fontWeight = FontWeight.Black)
-        Text(value, color = navy, fontSize = 22.sp, fontWeight = FontWeight.Black)
+        Text(icon, color = accent, fontSize = 21.sp, fontWeight = FontWeight.Black)
+        Text(value, color = navy, fontSize = 19.sp, fontWeight = FontWeight.Black)
         Text(label, color = muted, fontSize = 10.sp, maxLines = 1)
     }
 }

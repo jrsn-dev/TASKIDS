@@ -3,7 +3,7 @@ package com.example.ui.game
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -68,18 +68,7 @@ private fun GameMissionLandscape(
 
                 Spacer(Modifier.height(8.dp))
 
-                Box(
-                    modifier = Modifier
-                        .size(92.dp)
-                        .background(TaskIdsColors.Yellow, RoundedCornerShape(26.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    GameIcon(
-                        key = task.iconKey,
-                        modifier = Modifier.size(58.dp),
-                        tint = TaskIdsColors.Ink
-                    )
-                }
+                GameIcon(task.iconKey, Modifier.size(92.dp), tint = TaskIdsColors.Blue)
 
                 Spacer(Modifier.height(12.dp))
 
@@ -144,27 +133,13 @@ private fun GameMissionLandscape(
 
                 Spacer(Modifier.weight(1f))
 
-                Text(
-                    "%02d:%02d".format(minutes, seconds),
-                    color = TaskIdsColors.Ink,
-                    fontSize = 108.sp,
-                    fontWeight = FontWeight.Black
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                LinearProgressIndicator(
-                    progress = { timer.progress.coerceIn(0f, 1f) },
-                    modifier = Modifier
-                        .fillMaxWidth(0.78f)
-                        .height(16.dp),
-                    color = when {
-                        timer.progress > 0.5f -> TaskIdsColors.Blue
-                        timer.progress > 0.25f -> TaskIdsColors.Yellow
-                        else -> TaskIdsColors.Pink
-                    },
-                    trackColor = Color(0xFFE6ECF5)
-                )
+                Box(Modifier.size(260.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(progress = { timer.progress.coerceIn(0f, 1f) },
+                        modifier = Modifier.fillMaxSize(), color = TaskIdsColors.Blue,
+                        trackColor = TaskIdsColors.SoftBlue, strokeWidth = 18.dp)
+                    Text("%02d:%02d".format(minutes, seconds), color = TaskIdsColors.Ink,
+                        fontSize = 65.sp, fontWeight = FontWeight.Black)
+                }
 
                 Spacer(Modifier.height(12.dp))
 

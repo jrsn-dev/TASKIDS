@@ -44,6 +44,11 @@ for node in root.iter("node"):
             x,y=(x1+x2)//2,(y1+y2)//2
             matches.append(((x-cx)**2+(y-cy)**2,x,y))
 if matches:
+    if target.isdigit():
+        matches.sort(key=lambda point: -point[2])
+        _,x,y=matches[0]
+        print(f"{x} {y}")
+        sys.exit(0)
     _,x,y=min(matches)
     print(f"{x} {y}")
     sys.exit(0)
@@ -100,6 +105,13 @@ adb logcat -d > real-screenshots/logcat.txt || true
 
 tap_text_optional "Wait"
 capture "01-home-game.png"
+
+tap_text "Missões" 10
+capture "01a-child-missions.png"
+tap_text "Início" 10
+tap_text "Recompensas" 10
+capture "01b-child-rewards.png"
+tap_text "Início" 10
 
 tap_text "PAIS" 15
 sleep 2
