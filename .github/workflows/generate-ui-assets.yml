@@ -1,0 +1,43 @@
+name: Generate TASKIDS UI assets
+
+on:
+  push:
+    branches:
+      - refactor/taskids-v2-ux-architecture
+    paths:
+      - "tools/generate_taskids_ui_assets.py"
+      - ".github/workflows/generate-ui-assets.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: refactor/taskids-v2-ux-architecture
+          fetch-depth: 0
+
+      - name: Install image dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y fonts-noto-color-emoji
+          python3 -m pip install --disable-pip-version-check Pillow
+
+      - name: Generate PNG UI assets
+        run: python3 tools/generate_taskids_ui_assets.py
+
+      - name: Commit generated PNG assets
+        run: |
+          if git diff --quiet -- app/src/main/assets/ui; then
+            echo "Assets already up to date."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add app/src/main/assets/ui
+          git commit -m "feat(assets): generate TASKIDS colorful PNG UI pack"
+          git push origin HEAD:refactor/taskids-v2-ux-architecture
