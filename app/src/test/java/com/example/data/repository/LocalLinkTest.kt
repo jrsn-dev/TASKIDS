@@ -51,6 +51,9 @@ class LocalLinkTest {
         assertEquals(1, repo.listRoutines(id).size)
         link.importProfile(payload)
         assertEquals(1, repo.listTasks(id).size)
+        val withoutRewards = org.json.JSONObject(payload).apply { put("rewards", org.json.JSONArray()) }.toString()
+        link.importProfile(withoutRewards)
+        assertTrue(repo.listRewards(id).isEmpty())
     }
 
     @Test fun emptyTransferredCatalogRemovesItemsWithoutRecreatingDefaults() = runBlocking {

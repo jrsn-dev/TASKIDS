@@ -142,6 +142,8 @@ tap_text "Biblioteca" 10
 capture "08-parent-library.png"
 tap_text "Conectar TV" 10
 capture "09-parent-pairing.png"
+adb shell input swipe 900 312 170 312 450
+sleep 2
 tap_text "Ajustes" 10
 capture "10-parent-settings.png"
 
