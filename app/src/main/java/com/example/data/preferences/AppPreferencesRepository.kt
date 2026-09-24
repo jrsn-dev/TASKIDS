@@ -9,6 +9,8 @@ class AppPreferencesRepository(context: Context) {
         context.getSharedPreferences("kid_task_prefs", Context.MODE_PRIVATE)
 
     companion object {
+        private const val KEY_TV_HOST = "tv_host"
+        private const val KEY_TV_CODE = "tv_code"
         private const val KEY_SOUND_ENABLED = "sound_enabled"
         private const val KEY_SELECTED_CHILD_ID = "selected_child_id"
         private const val KEY_PARENTAL_PIN_HASH = "parental_pin_hash"
@@ -37,6 +39,14 @@ class AppPreferencesRepository(context: Context) {
             }
         }
     }
+
+    var tvHost: String
+        get() = prefs.getString(KEY_TV_HOST, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_TV_HOST, value).apply()
+
+    var tvCode: String
+        get() = prefs.getString(KEY_TV_CODE, "") ?: ""
+        set(value) = prefs.edit().putString(KEY_TV_CODE, value).apply()
 
     var soundEnabled: Boolean
         get() = prefs.getBoolean(KEY_SOUND_ENABLED, true)

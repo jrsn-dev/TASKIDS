@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.contentDescription
@@ -70,7 +71,7 @@ private fun BrandHeader(child: Child?, onParents: () -> Unit) {
             Modifier.background(Color.White, CircleShape).padding(horizontal = 10.dp, vertical = 7.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Star, contentDescription = null, tint = TaskIdsColors.Yellow, modifier = Modifier.size(22.dp))
+            Image(painterResource(R.drawable.nav_star), contentDescription = null, modifier = Modifier.size(22.dp))
             Spacer(Modifier.width(4.dp))
             Text("${child?.totalStars ?: 0}", color = navy, fontSize = 16.sp, fontWeight = FontWeight.Black)
         }
@@ -90,17 +91,17 @@ private fun ChildBottomBar(active: String, onHome: () -> Unit, onMissions: () ->
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         listOf(
-            Triple("Início", Icons.Default.Home, onHome),
-            Triple("Missões", Icons.Default.CheckCircle, onMissions),
-            Triple("Recompensas", Icons.Default.Star, onRewards),
-            Triple("Mais", Icons.Default.MoreVert, onMore)
+            Triple("Início", R.drawable.nav_home, onHome),
+            Triple("Missões", R.drawable.nav_missions, onMissions),
+            Triple("Recompensas", R.drawable.nav_star, onRewards),
+            Triple("Mais", R.drawable.nav_more, onMore)
         ).forEach { (label, icon, click) ->
             val selected = label == active
             Column(
                 Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(onClick = click).padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(icon, label, tint = if (selected) TaskIdsColors.Blue else muted, modifier = Modifier.size(24.dp))
+                Image(painterResource(icon), label, modifier = Modifier.size(24.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
                 Spacer(Modifier.height(2.dp))
                 Text(label, color = if (selected) TaskIdsColors.Blue else muted, fontSize = 10.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)

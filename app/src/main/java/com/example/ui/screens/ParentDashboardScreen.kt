@@ -41,6 +41,7 @@ private enum class ParentSection(val label: String, val icon: String) {
     REWARDS("Recompensas", "🎁"),
     LIBRARY("Biblioteca", "📚"),
     PROFILES("Perfis", "👨‍👩‍👧‍👦"),
+    CONNECTION("Conectar TV", "📺"),
     SETTINGS("Configurações", "⚙")
 }
 
@@ -70,6 +71,10 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
     var showAddReward by remember { mutableStateOf(false) }
     var showAddProfile by remember { mutableStateOf(false) }
     var showAddRoutine by remember { mutableStateOf(false) }
+    var editingTask by remember { mutableStateOf<Task?>(null) }
+    var editingChild by remember { mutableStateOf<Child?>(null) }
+    var editingRoutine by remember { mutableStateOf<Routine?>(null) }
+    var editingReward by remember { mutableStateOf<Reward?>(null) }
 
     Box(
         modifier = Modifier
@@ -158,6 +163,7 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                         tasks = tasks,
                         onAdd = { showAddTask = true },
                         onDelete = { viewModel.deleteTask(it) },
+                        onEdit = { editingTask = it },
                         onToggle = {
                             viewModel.editTask(it.copy(isActive = !it.isActive))
                         }
@@ -165,11 +171,15 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                     ParentSection.ROUTINES -> RoutinesSection(
                         routines = routines,
                         tasks = tasks,
-                        onAdd = { showAddRoutine = true }
+                        onAdd = { showAddRoutine = true },
+                        onEdit = { editingRoutine = it },
+                        onDelete = viewModel::deleteRoutine
                     )
                     ParentSection.REWARDS -> RewardsParentSection(
                         rewards = rewards,
-                        onAdd = { showAddReward = true }
+                        onAdd = { showAddReward = true },
+                        onEdit = { editingReward = it },
+                        onDelete = viewModel::deleteReward
                     )
                     ParentSection.LIBRARY -> ParentLibraryContent(
                         modifier = Modifier.fillMaxSize()
@@ -178,8 +188,11 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                         children = children,
                         currentId = child?.id,
                         onSelect = { viewModel.selectChild(it.id) },
-                        onAdd = { showAddProfile = true }
+                        onAdd = { showAddProfile = true },
+                        onEdit = { editingChild = it },
+                        onDelete = viewModel::deleteChild
                     )
+                    ParentSection.CONNECTION -> DeviceConnectionSection(viewModel, Modifier.fillMaxSize())
                     ParentSection.SETTINGS -> SettingsSection(
                         child = child,
                         soundEnabled = soundEnabled,
@@ -192,6 +205,32 @@ private fun ParentDashboardLargeScreen(viewModel: MainViewModel) {
                 }
             }
         }
+    }
+
+    if (editingTask != null) {
+        val task = editingTask!!
+        MobileTaskDialog(initial = task, onDismiss = { editingTask = null }, onSave = { title, minutes, stars, xp ->
+            viewModel.editTask(task.copy(title = title, durationMinutes = minutes, rewardStars = stars, rewardXp = xp))
+            editingTask = null
+        })
+    }
+    if (editingChild != null) {
+        val profile = editingChild!!
+        TvEditNameDialog("Editar perfil", profile.name, { editingChild = null }) { name ->
+            viewModel.updateChild(profile.copy(name = name)); editingChild = null
+        }
+    }
+    if (editingRoutine != null) {
+        val routine = editingRoutine!!
+        MobileRoutineDialog(initial = routine, onDismiss = { editingRoutine = null }, onSave = { title, time ->
+            viewModel.updateRoutine(routine.copy(title = title, startTime = time.ifBlank { null })); editingRoutine = null
+        })
+    }
+    if (editingReward != null) {
+        val reward = editingReward!!
+        MobileRewardDialog(initial = reward, onDismiss = { editingReward = null }, onSave = { title, stars ->
+            viewModel.updateReward(reward.copy(title = title, costStars = stars)); editingReward = null
+        })
     }
 
     if (showAddTask) {
@@ -407,6 +446,7 @@ private fun TasksSection(
     tasks: List<Task>,
     onAdd: () -> Unit,
     onDelete: (Task) -> Unit,
+    onEdit: (Task) -> Unit,
     onToggle: (Task) -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
@@ -466,6 +506,9 @@ private fun TasksSection(
                         )
                     }
                     Spacer(Modifier.width(8.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("EDITAR", color = TaskIdsColors.Blue, fontSize = 11.sp,
+                        modifier = Modifier.clickable { onEdit(task) }.padding(8.dp))
                     Box(
                         modifier = Modifier
                             .background(Color(0xFFFFE9EC), CircleShape)
@@ -484,7 +527,9 @@ private fun TasksSection(
 private fun RoutinesSection(
     routines: List<Routine>,
     tasks: List<Task>,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    onEdit: (Routine) -> Unit,
+    onDelete: (Routine) -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -534,11 +579,10 @@ private fun RoutinesSection(
                         Spacer(Modifier.height(14.dp))
                         Text("Dias: ${routine.daysCsv}", color = TaskIdsColors.Muted, fontSize = 11.sp)
                         Spacer(Modifier.height(14.dp))
-                        Text(
-                            "Tarefas podem ser associadas a esta rotina na próxima etapa de edição detalhada.",
-                            color = TaskIdsColors.Muted,
-                            fontSize = 11.sp
-                        )
+                        Text("EDITAR", color = TaskIdsColors.Blue,
+                            modifier = Modifier.clickable { onEdit(routine) }.padding(8.dp))
+                        Text("EXCLUIR", color = TaskIdsColors.Pink,
+                            modifier = Modifier.clickable { onDelete(routine) }.padding(8.dp))
                     }
                 }
             }
@@ -547,7 +591,7 @@ private fun RoutinesSection(
 }
 
 @Composable
-private fun RewardsParentSection(rewards: List<Reward>, onAdd: () -> Unit) {
+private fun RewardsParentSection(rewards: List<Reward>, onAdd: () -> Unit, onEdit: (Reward) -> Unit, onDelete: (Reward) -> Unit) {
     Column(Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column {
@@ -588,6 +632,8 @@ private fun RewardsParentSection(rewards: List<Reward>, onAdd: () -> Unit) {
                         Text(reward.description, color = TaskIdsColors.Muted, fontSize = 11.sp)
                     }
                     Text("⭐ ${reward.costStars}", color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
+                    Text("EDITAR", color = TaskIdsColors.Blue, modifier = Modifier.clickable { onEdit(reward) }.padding(8.dp))
+                    Text("EXCLUIR", color = TaskIdsColors.Pink, modifier = Modifier.clickable { onDelete(reward) }.padding(8.dp))
                 }
             }
         }
@@ -599,7 +645,9 @@ private fun ProfilesSection(
     children: List<Child>,
     currentId: Long?,
     onSelect: (Child) -> Unit,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    onEdit: (Child) -> Unit,
+    onDelete: (Child) -> Unit
 ) {
     Column(Modifier.fillMaxSize()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -645,6 +693,10 @@ private fun ProfilesSection(
                     Spacer(Modifier.height(10.dp))
                     Text(profile.name, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black, fontSize = 18.sp)
                     Text("${profile.totalStars} estrelas • ${profile.totalXp} XP", color = TaskIdsColors.Muted, fontSize = 12.sp)
+                    Text("EDITAR", color = TaskIdsColors.Blue,
+                        modifier = Modifier.clickable { onEdit(profile) }.padding(7.dp))
+                    if (children.size > 1) Text("EXCLUIR", color = TaskIdsColors.Pink,
+                        modifier = Modifier.clickable { onDelete(profile) }.padding(7.dp))
                     if (selected) {
                         Spacer(Modifier.height(8.dp))
                         Text("Perfil ativo", color = TaskIdsColors.Blue, fontWeight = FontWeight.Black, fontSize = 11.sp)
@@ -1067,6 +1119,18 @@ private fun SimpleFormDialog(
             }
             Spacer(Modifier.height(16.dp))
             content()
+        }
+    }
+}
+
+@Composable
+private fun TvEditNameDialog(title: String, initial: String, onDismiss: () -> Unit, onSave: (String) -> Unit) {
+    var name by remember(initial) { mutableStateOf(initial) }
+    SimpleFormDialog(title, onDismiss) {
+        OutlinedTextField(name, { name = it.take(40) }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())
+        Spacer(Modifier.height(12.dp))
+        PrimaryTvButton("Salvar", TaskIdsColors.Blue, Modifier.fillMaxWidth()) {
+            if (name.isNotBlank()) onSave(name.trim())
         }
     }
 }

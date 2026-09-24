@@ -10,6 +10,12 @@ interface RoutineDao {
     @Query("SELECT * FROM routines WHERE childId = :childId AND isActive = 1 ORDER BY id ASC")
     fun observeRoutines(childId: Long): Flow<List<Routine>>
 
+    @Delete
+    suspend fun delete(item: Routine)
+
+    @Query("SELECT * FROM routines WHERE childId = :childId AND isActive = 1 ORDER BY id ASC")
+    suspend fun listForChild(childId: Long): List<Routine>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(routine: Routine): Long
 

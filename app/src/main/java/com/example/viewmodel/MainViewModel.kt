@@ -1,6 +1,8 @@
 package com.example.viewmodel
 
 import android.content.Context
+import android.app.UiModeManager
+import android.content.res.Configuration
 import android.media.AudioManager
 import android.media.ToneGenerator
 import androidx.lifecycle.ViewModel
@@ -8,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.data.local.TaskDatabase
 import com.example.data.preferences.AppPreferencesRepository
+import com.example.data.repository.LocalLink
 import com.example.data.repository.TaskRepository
 import com.example.game.GameEngine
 import com.example.model.Achievement
@@ -23,6 +26,8 @@ import com.example.model.TaskStatus
 import com.example.ui.navigation.AppScreen
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -65,8 +70,45 @@ enum class PinVerificationResult {
 @OptIn(ExperimentalCoroutinesApi::class)
 class MainViewModel(
     private val repository: TaskRepository,
-    private val prefs: AppPreferencesRepository
+    private val prefs: AppPreferencesRepository,
+    private val isTv: Boolean
 ) : ViewModel() {
+
+    private val localLink = LocalLink(repository)
+    val isTelevision: Boolean get() = isTv
+    val tvAddress: String get() = localLink.address
+    val tvCode: String get() = localLink.code
+    private val _linkHost = MutableStateFlow(prefs.tvHost)
+    val linkHost: StateFlow<String> = _linkHost.asStateFlow()
+    private val _linkCode = MutableStateFlow(prefs.tvCode)
+    val linkCode: StateFlow<String> = _linkCode.asStateFlow()
+    private val _linkStatus = MutableStateFlow(if (isTv) "TV pronta para vincular" else "Digite os dados exibidos na TV")
+    val linkStatus: StateFlow<String> = _linkStatus.asStateFlow()
+
+    fun updateLinkDetails(host: String, code: String) {
+        prefs.tvHost = host.trim(); prefs.tvCode = code.trim()
+        _linkHost.value = prefs.tvHost; _linkCode.value = prefs.tvCode
+    }
+
+    fun testLink() = linkAction { localLink.ping(linkHost.value, linkCode.value); "TV conectada!" }
+    fun sendToTv() = linkAction {
+        localLink.push(linkHost.value, linkCode.value, selectedChildId.value)
+        "Perfil enviado para a TV."
+    }
+    fun receiveFromTv() = linkAction {
+        val id = localLink.pull(linkHost.value, linkCode.value)
+        prefs.selectedChildId = id
+        _selectedChildId.value = id
+        "Perfil e progresso recebidos da TV."
+    }
+
+    private fun linkAction(block: suspend () -> String) {
+        viewModelScope.launch {
+            _linkStatus.value = "Conectando..."
+            _linkStatus.value = runCatching { block() }
+                .getOrElse { "Falha: ${it.message ?: "verifique a rede Wi-Fi"}" }
+        }
+    }
 
     private val _currentScreen = MutableStateFlow<AppScreen>(AppScreen.Home)
     val currentScreen: StateFlow<AppScreen> = _currentScreen.asStateFlow()
@@ -164,6 +206,13 @@ class MainViewModel(
     val lastMissionCompletion: StateFlow<MissionCompletion?> = _lastMissionCompletion.asStateFlow()
 
     init {
+        if (isTv) viewModelScope.launch {
+            runCatching { localLink.serve({ selectedChildId.value }) { id ->
+                prefs.selectedChildId = id
+                _selectedChildId.value = id
+            } }
+                .onFailure { _linkStatus.value = "Não foi possível iniciar a conexão: ${it.message}" }
+        }
         viewModelScope.launch {
             seedInitialData()
             val selectedExists = repository.childById(prefs.selectedChildId) != null
@@ -172,6 +221,11 @@ class MainViewModel(
             }
             restoreTimerIfNeeded()
         }
+    }
+
+    override fun onCleared() {
+        localLink.close()
+        super.onCleared()
     }
 
     fun navigateTo(screen: AppScreen) {
@@ -558,6 +612,14 @@ class MainViewModel(
         }
     }
 
+    fun updateReward(reward: Reward) {
+        viewModelScope.launch { repository.upsertReward(reward) }
+    }
+
+    fun deleteReward(reward: Reward) {
+        viewModelScope.launch { repository.deleteReward(reward) }
+    }
+
     fun addChild(name: String, avatarEmoji: String) {
         if (name.isBlank()) return
         viewModelScope.launch {
@@ -584,6 +646,30 @@ class MainViewModel(
         }
     }
 
+
+    fun updateChild(child: Child) {
+        if (child.name.isBlank()) return
+        viewModelScope.launch { repository.updateChild(child.copy(name = child.name.trim())) }
+    }
+
+    fun deleteChild(child: Child) {
+        if (children.value.count { it.isActive } <= 1) return
+        viewModelScope.launch {
+            repository.updateChild(child.copy(isActive = false))
+            if (selectedChildId.value == child.id) {
+                val next = children.value.firstOrNull { it.id != child.id }?.id ?: return@launch
+                selectChild(next)
+            }
+        }
+    }
+
+    fun updateRoutine(routine: Routine) {
+        viewModelScope.launch { repository.upsertRoutine(routine) }
+    }
+
+    fun deleteRoutine(routine: Routine) {
+        viewModelScope.launch { repository.deleteRoutine(routine) }
+    }
 
     fun updateAvatar(
         character: String,
@@ -648,17 +734,7 @@ class MainViewModel(
     private suspend fun seedInitialData() {
         if (repository.childrenCount() == 0) {
             DefaultProfiles.children().forEach { repository.upsertChild(it) }
-        }
-
-        DefaultProfiles.children().forEach { profile ->
-            if (repository.countTasksForChild(profile.id) == 0) {
-                DefaultTasks.getDefaultTasks()
-                    .filter { it.childId == profile.id }
-                    .forEach { repository.insertTask(it) }
-            }
-        }
-
-        if (repository.rewardsCount() == 0) {
+            DefaultTasks.getDefaultTasks().forEach { repository.insertTask(it) }
             DefaultProfiles.rewards().forEach { repository.upsertReward(it) }
         }
     }
@@ -687,7 +763,9 @@ class MainViewModelFactory(
             )
             val prefs = AppPreferencesRepository(context)
             @Suppress("UNCHECKED_CAST")
-            return MainViewModel(repository, prefs) as T
+            val uiManager = context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
+            val isTv = uiManager.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION
+            return MainViewModel(repository, prefs, isTv) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

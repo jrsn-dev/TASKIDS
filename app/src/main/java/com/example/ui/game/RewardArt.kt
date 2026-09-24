@@ -14,9 +14,9 @@ import com.example.ui.design.TaskIdsColors
 @Composable
 fun RewardArt(type: String, modifier: Modifier = Modifier) {
     val asset = when (type.uppercase()) {
-        "SCREEN_TIME" -> "reward_game.webp"
-        "MOVIE" -> "reward_movie.webp"
-        else -> "reward_gift.webp"
+        "SCREEN_TIME" -> "reward_game.png"
+        "MOVIE" -> "reward_movie.png"
+        else -> "reward_gift.png"
     }
     val context = LocalContext.current
     val bitmap = remember(asset) {

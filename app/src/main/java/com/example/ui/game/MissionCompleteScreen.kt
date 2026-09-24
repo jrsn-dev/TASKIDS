@@ -2,7 +2,7 @@ package com.example.ui.game
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -11,7 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.graphicsLayer
+import com.example.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -50,23 +52,9 @@ private fun MissionCompleteLandscape(viewModel: MainViewModel) {
     Box(Modifier.fillMaxSize()) {
         GameWorldBackground(theme, Modifier.fillMaxSize())
 
-        Canvas(Modifier.fillMaxSize()) {
-            val center = Offset(size.width * 0.5f, size.height * 0.36f)
-            val particles = 24
-            repeat(particles) { i ->
-                val angle = (i.toFloat() / particles) * 6.28318f
-                val distance = minOf(size.width, size.height) * 0.28f * burst.value
-                val x = center.x + kotlin.math.cos(angle.toDouble()).toFloat() * distance
-                val y = center.y + kotlin.math.sin(angle.toDouble()).toFloat() * distance
-                val color = when (i % 4) {
-                    0 -> TaskIdsColors.Yellow
-                    1 -> TaskIdsColors.Green
-                    2 -> TaskIdsColors.Blue
-                    else -> TaskIdsColors.Purple
-                }
-                drawCircle(color.copy(alpha = 1f - burst.value * 0.3f), 5f + (i % 3) * 2f, Offset(x, y))
-            }
-        }
+        Image(painterResource(R.drawable.game_confetti), contentDescription = null,
+            modifier = Modifier.fillMaxSize().graphicsLayer { alpha = burst.value },
+            contentScale = androidx.compose.ui.layout.ContentScale.FillBounds)
 
         Row(
             modifier = Modifier

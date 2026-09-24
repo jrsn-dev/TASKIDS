@@ -26,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import com.example.R
@@ -56,6 +57,7 @@ private enum class MobileParentSection(val label: String) {
     REWARDS("Prêmios"),
     REPORTS("Relatórios"),
     LIBRARY("Biblioteca"),
+    CONNECTION("Conectar TV"),
     SETTINGS("Ajustes")
 }
 
@@ -75,6 +77,10 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
     var showAddRoutine by remember { mutableStateOf(false) }
     var showAddReward by remember { mutableStateOf(false) }
     var showMore by remember { mutableStateOf(false) }
+    var editingTask by remember { mutableStateOf<Task?>(null) }
+    var editingChild by remember { mutableStateOf<Child?>(null) }
+    var editingRoutine by remember { mutableStateOf<Routine?>(null) }
+    var editingReward by remember { mutableStateOf<Reward?>(null) }
 
     Box(Modifier.fillMaxSize()) {
       GameWorldBackground(GameThemeKey.from(child?.gameTheme ?: "SKY"), Modifier.fillMaxSize())
@@ -129,21 +135,28 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
                     children = children,
                     currentId = child?.id,
                     onSelect = { viewModel.selectChild(it.id) },
-                    onAdd = { showAddProfile = true }
+                    onAdd = { showAddProfile = true },
+                    onEdit = { editingChild = it },
+                    onDelete = viewModel::deleteChild
                 )
                 MobileParentSection.MISSIONS -> MobileMissions(
                     tasks = tasks,
                     onAdd = { showAddTask = true },
                     onToggle = { viewModel.editTask(it.copy(isActive = !it.isActive)) },
-                    onDelete = viewModel::deleteTask
+                    onDelete = viewModel::deleteTask,
+                    onEdit = { editingTask = it }
                 )
                 MobileParentSection.ROUTINES -> MobileRoutines(
                     routines = routines,
-                    onAdd = { showAddRoutine = true }
+                    onAdd = { showAddRoutine = true },
+                    onEdit = { editingRoutine = it },
+                    onDelete = viewModel::deleteRoutine
                 )
                 MobileParentSection.REWARDS -> MobileRewards(
                     rewards = rewards,
-                    onAdd = { showAddReward = true }
+                    onAdd = { showAddReward = true },
+                    onEdit = { editingReward = it },
+                    onDelete = viewModel::deleteReward
                 )
                 MobileParentSection.REPORTS -> MobileReports(
                     child = child,
@@ -156,6 +169,7 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
                         .fillMaxSize()
                         .padding(bottom = 12.dp)
                 )
+                MobileParentSection.CONNECTION -> DeviceConnectionSection(viewModel, Modifier.fillMaxSize())
                 MobileParentSection.SETTINGS -> MobileSettings(
                     child = child,
                     soundEnabled = soundEnabled,
@@ -184,6 +198,32 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
             onMore = { showMore = !showMore }
         )
       }
+    }
+
+    if (editingTask != null) {
+        val task = editingTask!!
+        MobileTaskDialog(initial = task, onDismiss = { editingTask = null }, onSave = { title, minutes, stars, xp ->
+            viewModel.editTask(task.copy(title = title, durationMinutes = minutes, rewardStars = stars, rewardXp = xp))
+            editingTask = null
+        })
+    }
+    if (editingChild != null) {
+        val profile = editingChild!!
+        MobileTextDialog("Editar perfil", "Nome da criança", { editingChild = null }, { name ->
+            viewModel.updateChild(profile.copy(name = name)); editingChild = null
+        }, initial = profile.name)
+    }
+    if (editingRoutine != null) {
+        val routine = editingRoutine!!
+        MobileRoutineDialog(initial = routine, onDismiss = { editingRoutine = null }, onSave = { title, time ->
+            viewModel.updateRoutine(routine.copy(title = title, startTime = time.ifBlank { null })); editingRoutine = null
+        })
+    }
+    if (editingReward != null) {
+        val reward = editingReward!!
+        MobileRewardDialog(initial = reward, onDismiss = { editingReward = null }, onSave = { title, stars ->
+            viewModel.updateReward(reward.copy(title = title, costStars = stars)); editingReward = null
+        })
     }
 
     if (showAddTask) {
@@ -275,10 +315,10 @@ private fun MobileParentBottomBar(
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         listOf(
-            Triple("Início", Icons.Default.Home, onHome),
-            Triple("Área dos Pais", Icons.Default.CheckCircle, onOverview),
-            Triple("Recompensas", Icons.Default.Star, onRewards),
-            Triple("Mais", Icons.Default.MoreVert, onMore)
+            Triple("Início", R.drawable.nav_home, onHome),
+            Triple("Área dos Pais", R.drawable.nav_missions, onOverview),
+            Triple("Recompensas", R.drawable.nav_star, onRewards),
+            Triple("Mais", R.drawable.nav_more, onMore)
         ).forEach { (label, icon, click) ->
             val selected = when (label) {
                 "Área dos Pais" -> active == MobileParentSection.OVERVIEW
@@ -287,8 +327,8 @@ private fun MobileParentBottomBar(
             }
             Column(Modifier.weight(1f).clickable(onClick = click).padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally) {
-                Icon(icon, label, tint = if (selected) TaskIdsColors.Blue else TaskIdsColors.Muted,
-                    modifier = Modifier.size(22.dp))
+                Image(painterResource(icon), label,
+                    modifier = Modifier.size(22.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
                 Text(label, color = if (selected) TaskIdsColors.Blue else TaskIdsColors.Muted,
                     fontSize = 10.sp, maxLines = 1, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
             }
@@ -426,7 +466,9 @@ private fun MobileChildren(
     children: List<Child>,
     currentId: Long?,
     onSelect: (Child) -> Unit,
-    onAdd: () -> Unit
+    onAdd: () -> Unit,
+    onEdit: (Child) -> Unit,
+    onDelete: (Child) -> Unit
 ) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         item {
@@ -449,6 +491,12 @@ private fun MobileChildren(
                     Text("${profile.totalStars} estrelas • ${profile.totalXp} XP", color = TaskIdsColors.Muted, fontSize = 13.sp)
                     Text("Sequência: ${profile.currentStreak} dias", color = TaskIdsColors.Muted, fontSize = 13.sp)
                 }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text("EDITAR", color = TaskIdsColors.Blue, fontSize = 10.sp,
+                        modifier = Modifier.clickable { onEdit(profile) }.padding(6.dp))
+                    if (children.size > 1) Text("EXCLUIR", color = TaskIdsColors.Pink, fontSize = 10.sp,
+                        modifier = Modifier.clickable { onDelete(profile) }.padding(6.dp))
+                }
                 if (profile.id == currentId) {
                     Text("ATIVO", color = TaskIdsColors.Blue, fontWeight = FontWeight.Black, fontSize = 10.sp)
                 }
@@ -462,7 +510,8 @@ private fun MobileMissions(
     tasks: List<Task>,
     onAdd: () -> Unit,
     onToggle: (Task) -> Unit,
-    onDelete: (Task) -> Unit
+    onDelete: (Task) -> Unit,
+    onEdit: (Task) -> Unit
 ) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         item {
@@ -492,6 +541,8 @@ private fun MobileMissions(
                         fontSize = 10.sp
                     )
                 }
+                Text("EDITAR", color = TaskIdsColors.Blue, fontSize = 9.sp,
+                    modifier = Modifier.clickable { onEdit(task) }.padding(8.dp))
                 Text(
                     if (task.isActive) "ATIVA" else "PAUSADA",
                     color = if (task.isActive) TaskIdsColors.Green else TaskIdsColors.Muted,
@@ -516,7 +567,7 @@ private fun MobileMissions(
 }
 
 @Composable
-private fun MobileRoutines(routines: List<Routine>, onAdd: () -> Unit) {
+private fun MobileRoutines(routines: List<Routine>, onAdd: () -> Unit, onEdit: (Routine) -> Unit, onDelete: (Routine) -> Unit) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         item {
             SectionTitle("Rotinas", "Agrupe hábitos por período e dia.")
@@ -535,13 +586,17 @@ private fun MobileRoutines(routines: List<Routine>, onAdd: () -> Unit) {
                     color = TaskIdsColors.Muted,
                     fontSize = 13.sp
                 )
+                Row {
+                    Text("EDITAR", color = TaskIdsColors.Blue, modifier = Modifier.clickable { onEdit(routine) }.padding(8.dp))
+                    Text("EXCLUIR", color = TaskIdsColors.Pink, modifier = Modifier.clickable { onDelete(routine) }.padding(8.dp))
+                }
             }
         }
     }
 }
 
 @Composable
-private fun MobileRewards(rewards: List<Reward>, onAdd: () -> Unit) {
+private fun MobileRewards(rewards: List<Reward>, onAdd: () -> Unit, onEdit: (Reward) -> Unit, onDelete: (Reward) -> Unit) {
     LazyColumn(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         item {
             SectionTitle("Recompensas", "Defina metas e prêmios por estrelas.")
@@ -558,6 +613,10 @@ private fun MobileRewards(rewards: List<Reward>, onAdd: () -> Unit) {
                 Text("${reward.costStars} estrelas", color = TaskIdsColors.Orange, fontWeight = FontWeight.Bold, fontSize = 13.sp)
                 if (reward.description.isNotBlank()) {
                     Text(reward.description, color = TaskIdsColors.Muted, fontSize = 13.sp)
+                }
+                Row {
+                    Text("EDITAR", color = TaskIdsColors.Blue, modifier = Modifier.clickable { onEdit(reward) }.padding(8.dp))
+                    Text("EXCLUIR", color = TaskIdsColors.Pink, modifier = Modifier.clickable { onDelete(reward) }.padding(8.dp))
                 }
             }
         }
@@ -736,9 +795,10 @@ private fun MobileTextDialog(
     title: String,
     label: String,
     onDismiss: () -> Unit,
-    onSave: (String) -> Unit
+    onSave: (String) -> Unit,
+    initial: String = ""
 ) {
-    var value by remember { mutableStateOf("") }
+    var value by remember(initial) { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -758,18 +818,19 @@ private fun MobileTextDialog(
 }
 
 @Composable
-private fun MobileTaskDialog(
+internal fun MobileTaskDialog(
     onDismiss: () -> Unit,
-    onSave: (String, Int, Int, Int) -> Unit
+    onSave: (String, Int, Int, Int) -> Unit,
+    initial: Task? = null
 ) {
-    var title by remember { mutableStateOf("") }
-    var minutes by remember { mutableStateOf("15") }
-    var stars by remember { mutableStateOf("10") }
-    var xp by remember { mutableStateOf("100") }
+    var title by remember(initial) { mutableStateOf(initial?.title ?: "") }
+    var minutes by remember(initial) { mutableStateOf((initial?.durationMinutes ?: 15).toString()) }
+    var stars by remember(initial) { mutableStateOf((initial?.rewardStars ?: 10).toString()) }
+    var xp by remember(initial) { mutableStateOf((initial?.rewardXp ?: 100).toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nova missão") },
+        title = { Text(if (initial == null) "Nova missão" else "Editar missão") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(title, { title = it.take(60) }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())
@@ -795,15 +856,16 @@ private fun MobileTaskDialog(
 }
 
 @Composable
-private fun MobileRoutineDialog(
+internal fun MobileRoutineDialog(
     onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit
+    onSave: (String, String) -> Unit,
+    initial: Routine? = null
 ) {
-    var title by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
+    var title by remember(initial) { mutableStateOf(initial?.title ?: "") }
+    var time by remember(initial) { mutableStateOf(initial?.startTime ?: "") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nova rotina") },
+        title = { Text(if (initial == null) "Nova rotina" else "Editar rotina") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(title, { title = it.take(50) }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())
@@ -818,15 +880,16 @@ private fun MobileRoutineDialog(
 }
 
 @Composable
-private fun MobileRewardDialog(
+internal fun MobileRewardDialog(
     onDismiss: () -> Unit,
-    onSave: (String, Int) -> Unit
+    onSave: (String, Int) -> Unit,
+    initial: Reward? = null
 ) {
-    var title by remember { mutableStateOf("") }
-    var stars by remember { mutableStateOf("50") }
+    var title by remember(initial) { mutableStateOf(initial?.title ?: "") }
+    var stars by remember(initial) { mutableStateOf((initial?.costStars ?: 50).toString()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nova recompensa") },
+        title = { Text(if (initial == null) "Nova recompensa" else "Editar recompensa") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(title, { title = it.take(60) }, label = { Text("Nome") }, modifier = Modifier.fillMaxWidth())

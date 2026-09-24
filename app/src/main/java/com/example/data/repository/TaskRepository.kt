@@ -22,6 +22,10 @@ class TaskRepository(
     private val routineDao: RoutineDao
 ) {
     val children: Flow<List<Child>> = childDao.observeChildren()
+    suspend fun findActiveChild(name: String) = childDao.findActiveByName(name)
+    suspend fun listTasks(childId: Long) = taskDao.listForChild(childId)
+    suspend fun listRewards(childId: Long) = rewardDao.listForChild(childId)
+    suspend fun listRoutines(childId: Long) = routineDao.listForChild(childId)
 
     fun tasksForChild(childId: Long): Flow<List<Task>> = taskDao.getTasksForChild(childId)
 
@@ -63,6 +67,8 @@ class TaskRepository(
 
     suspend fun rewardsCount(): Int = rewardDao.countRewards()
 
+    suspend fun deleteReward(reward: Reward) = rewardDao.delete(reward)
+
     suspend fun insertRedemption(redemption: RewardRedemption): Long =
         rewardDao.insertRedemption(redemption)
 
@@ -72,4 +78,6 @@ class TaskRepository(
     fun routinesForChild(childId: Long): Flow<List<Routine>> = routineDao.observeRoutines(childId)
 
     suspend fun upsertRoutine(routine: Routine): Long = routineDao.upsert(routine)
+
+    suspend fun deleteRoutine(routine: Routine) = routineDao.delete(routine)
 }
