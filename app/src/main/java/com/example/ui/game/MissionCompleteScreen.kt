@@ -26,6 +26,13 @@ import com.example.viewmodel.MainViewModel
 
 @Composable
 fun MissionCompleteScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) ChildMobileComplete(viewModel) else MissionCompleteLandscape(viewModel)
+    }
+}
+
+@Composable
+private fun MissionCompleteLandscape(viewModel: MainViewModel) {
     val child by viewModel.currentChild.collectAsState()
     val completion by viewModel.lastMissionCompletion.collectAsState()
 

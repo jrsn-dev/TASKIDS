@@ -113,14 +113,15 @@ sleep 5
 tap_text_optional "Wait"
 capture "03-parent-dashboard.png"
 
+tap_text "Mais" 10
 tap_text "Missões" 10
 sleep 2
 capture "04-parent-missions.png"
 
-adb shell input swipe 900 170 180 170 450 || true
+tap_text "Mais" 10
 sleep 2
 if ! tap_text "Biblioteca" 6; then
-  adb shell input swipe 900 170 120 170 500 || true
+  adb shell input swipe 900 220 120 220 500 || true
   sleep 2
   tap_text "Biblioteca" 6
 fi

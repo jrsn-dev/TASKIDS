@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -9,6 +10,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
@@ -18,6 +26,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.R
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -27,8 +38,12 @@ import com.example.model.Reward
 import com.example.model.Routine
 import com.example.model.Task
 import com.example.ui.design.TaskIdsColors
+import com.example.ui.components.TaskIdsWordmark
 import com.example.ui.game.GameAvatar
 import com.example.ui.game.GameIcon
+import com.example.ui.game.GameWorldBackground
+import com.example.game.GameThemeKey
+import com.example.model.TaskStatus
 import com.example.ui.library.ParentLibraryContent
 import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
@@ -59,19 +74,17 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
     var showAddProfile by remember { mutableStateOf(false) }
     var showAddRoutine by remember { mutableStateOf(false) }
     var showAddReward by remember { mutableStateOf(false) }
+    var showMore by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(TaskIdsColors.SoftBg)
-            .statusBarsPadding()
-    ) {
+    Box(Modifier.fillMaxSize()) {
+      GameWorldBackground(GameThemeKey.from(child?.gameTheme ?: "SKY"), Modifier.fillMaxSize())
+      Column(Modifier.fillMaxSize().statusBarsPadding()) {
         MobileParentHeader(
             child = child,
             onExit = { viewModel.navigateTo(AppScreen.Home) }
         )
 
-        Row(
+        if (showMore) Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .horizontalScroll(rememberScrollState())
@@ -100,7 +113,7 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .padding(horizontal = 14.dp)
+                .padding(horizontal = 16.dp)
         ) {
             when (section) {
                 MobileParentSection.OVERVIEW -> MobileOverview(
@@ -163,6 +176,14 @@ fun ParentMobileDashboardScreen(viewModel: MainViewModel) {
                 )
             }
         }
+        MobileParentBottomBar(
+            active = section,
+            onHome = { viewModel.navigateTo(AppScreen.Home) },
+            onOverview = { section = MobileParentSection.OVERVIEW; showMore = false },
+            onRewards = { section = MobileParentSection.REWARDS; showMore = false },
+            onMore = { showMore = !showMore }
+        )
+      }
     }
 
     if (showAddTask) {
@@ -221,40 +242,56 @@ private fun MobileParentHeader(child: Child?, onExit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
-            .padding(16.dp),
+            .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        child?.let {
-            GameAvatar(
-                child = it,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(Modifier.width(10.dp))
-        }
-        Column(Modifier.weight(1f)) {
-            Text(
-                "Área dos Pais",
-                color = TaskIdsColors.Ink,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                child?.name ?: "TASKIDS",
-                color = TaskIdsColors.Muted,
-                fontSize = 13.sp
-            )
-        }
+        TaskIdsWordmark()
+        Spacer(Modifier.weight(1f))
         Text(
-            "SAIR",
-            color = Color.White,
+            "Sair",
+            color = TaskIdsColors.Ink,
             fontSize = 13.sp,
             fontWeight = FontWeight.Black,
             modifier = Modifier
-                .background(TaskIdsColors.Ink, RoundedCornerShape(14.dp))
+                .background(Color.White, RoundedCornerShape(18.dp))
                 .clickable(onClick = onExit)
                 .padding(horizontal = 14.dp, vertical = 9.dp)
         )
+    }
+}
+
+@Composable
+private fun MobileParentBottomBar(
+    active: MobileParentSection,
+    onHome: () -> Unit,
+    onOverview: () -> Unit,
+    onRewards: () -> Unit,
+    onMore: () -> Unit
+) {
+    Row(
+        Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+            .navigationBarsPadding().padding(horizontal = 6.dp, vertical = 9.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        listOf(
+            Triple("Início", Icons.Default.Home, onHome),
+            Triple("Área dos Pais", Icons.Default.CheckCircle, onOverview),
+            Triple("Recompensas", Icons.Default.Star, onRewards),
+            Triple("Mais", Icons.Default.MoreVert, onMore)
+        ).forEach { (label, icon, click) ->
+            val selected = when (label) {
+                "Área dos Pais" -> active == MobileParentSection.OVERVIEW
+                "Recompensas" -> active == MobileParentSection.REWARDS
+                else -> false
+            }
+            Column(Modifier.weight(1f).clickable(onClick = click).padding(vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(icon, label, tint = if (selected) TaskIdsColors.Blue else TaskIdsColors.Muted,
+                    modifier = Modifier.size(22.dp))
+                Text(label, color = if (selected) TaskIdsColors.Blue else TaskIdsColors.Muted,
+                    fontSize = 10.sp, maxLines = 1, fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium)
+            }
+        }
     }
 }
 
@@ -268,55 +305,88 @@ private fun MobileOverview(
     onMissions: () -> Unit,
     onLibrary: () -> Unit
 ) {
+    val active = tasks.filter { it.isActive }
+    val completed = active.count { it.status == TaskStatus.COMPLETED }
+    val progress = if (active.isEmpty()) 0f else completed.toFloat() / active.size
     LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(10.dp),
-        contentPadding = PaddingValues(bottom = 18.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        contentPadding = PaddingValues(bottom = 20.dp)
     ) {
         item {
-            Text(
-                "Visão geral",
-                color = TaskIdsColors.Ink,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                "Acompanhe o progresso e gerencie a jornada da criança.",
-                color = TaskIdsColors.Muted,
-                fontSize = 14.sp
-            )
+            Row(Modifier.fillMaxWidth().height(192.dp), verticalAlignment = Alignment.Bottom) {
+                Column(Modifier.weight(1f).padding(bottom = 12.dp)) {
+                    Text("Área dos Pais", color = TaskIdsColors.Ink, fontSize = 31.sp, fontWeight = FontWeight.Black)
+                    Text("Acompanhe o progresso e apoie as conquistas de ${child?.name ?: "sua criança"}.",
+                        color = TaskIdsColors.Muted, fontSize = 15.sp, lineHeight = 19.sp)
+                }
+                if (child != null) GameAvatar(child, Modifier.width(153.dp).fillMaxHeight())
+            }
         }
-
+        if (child != null) item {
+            Row(Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(24.dp))
+                .padding(13.dp), verticalAlignment = Alignment.CenterVertically) {
+                GameAvatar(child, Modifier.size(54.dp))
+                Spacer(Modifier.width(10.dp))
+                Column {
+                    Text(child.name, color = TaskIdsColors.Ink, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                    Text("$completed de ${active.size} missões concluídas", color = TaskIdsColors.Muted, fontSize = 12.sp)
+                }
+            }
+        }
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(7.dp)) {
                 MobileMetric("Estrelas", (child?.totalStars ?: 0).toString(), TaskIdsColors.Yellow, Modifier.weight(1f))
                 MobileMetric("XP", (child?.totalXp ?: 0).toString(), TaskIdsColors.Blue, Modifier.weight(1f))
+                MobileMetric("Missões", active.size.toString(), TaskIdsColors.Purple, Modifier.weight(1f))
+                MobileMetric("Concluídas", completed.toString(), TaskIdsColors.Pink, Modifier.weight(1f))
+            }
+        }
+        item {
+            Column(Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(26.dp)).padding(17.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Progresso de hoje", color = TaskIdsColors.Ink, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                    Text("${(progress * 100).toInt()}%", color = TaskIdsColors.Blue, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
+                Spacer(Modifier.height(10.dp))
+                LinearProgressIndicator({ progress }, Modifier.fillMaxWidth().height(14.dp),
+                    color = TaskIdsColors.Green, trackColor = TaskIdsColors.SoftBlue)
+                Spacer(Modifier.height(9.dp))
+                Text("$completed de ${active.size} missões concluídas", color = TaskIdsColors.Muted, fontSize = 13.sp)
+            }
+        }
+        item {
+            Column(Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(26.dp)).padding(15.dp)) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text("Missões pendentes", color = TaskIdsColors.Ink, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                    Text("Ver todas  ›", color = TaskIdsColors.Blue, fontSize = 13.sp,
+                        modifier = Modifier.clickable(onClick = onMissions))
+                }
+                Spacer(Modifier.height(10.dp))
+                val pending = active.filter { it.status != TaskStatus.COMPLETED }.take(3)
+                if (pending.isEmpty()) Text("Tudo concluído por hoje!", color = TaskIdsColors.Muted)
+                pending.forEach { task ->
+                    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp).clickable(onClick = onMissions),
+                        verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(50.dp).background(TaskIdsColors.SoftBlue, RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center) {
+                            if (task.iconKey == "BOOK") Image(painterResource(R.drawable.mission_book), null,
+                                Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                            else GameIcon(task.iconKey, Modifier.size(30.dp), tint = TaskIdsColors.Blue)
+                        }
+                        Spacer(Modifier.width(10.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(task.title, color = TaskIdsColors.Ink, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                            Text("${task.durationMinutes} min  •  ★ ${task.rewardStars}", color = TaskIdsColors.Muted, fontSize = 12.sp)
+                        }
+                        Text("›", color = TaskIdsColors.Blue, fontSize = 23.sp)
+                    }
+                }
             }
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                MobileMetric("Missões", tasks.size.toString(), TaskIdsColors.Green, Modifier.weight(1f))
-                MobileMetric("Concluídas", completedCount.toString(), TaskIdsColors.Purple, Modifier.weight(1f))
-            }
-        }
-        item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                QuickAction("GERENCIAR MISSÕES", TaskIdsColors.Blue, Modifier.weight(1f), onMissions)
-                QuickAction("ABRIR BIBLIOTECA", TaskIdsColors.Purple, Modifier.weight(1f), onLibrary)
-            }
-        }
-        item {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White, RoundedCornerShape(24.dp))
-                    .padding(16.dp)
-            ) {
-                Text("Resumo do perfil", color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
-                Spacer(Modifier.height(8.dp))
-                Text("Rotinas: ${routines.size}", color = TaskIdsColors.Muted, fontSize = 14.sp)
-                Text("Recompensas: ${rewards.size}", color = TaskIdsColors.Muted, fontSize = 14.sp)
-                Text("Sequência atual: ${child?.currentStreak ?: 0} dias", color = TaskIdsColors.Muted, fontSize = 14.sp)
-                Text("Melhor combo: x${child?.bestCombo ?: 0}", color = TaskIdsColors.Muted, fontSize = 14.sp)
+                QuickAction("Gerenciar missões  →", TaskIdsColors.Blue, Modifier.weight(1f), onMissions)
+                QuickAction("Abrir biblioteca  →", TaskIdsColors.Purple, Modifier.weight(1f), onLibrary)
             }
         }
     }
@@ -329,10 +399,10 @@ private fun MobileMetric(label: String, value: String, accent: Color, modifier: 
             .background(Color.White, RoundedCornerShape(22.dp))
             .padding(14.dp)
     ) {
-        Box(Modifier.size(8.dp).background(accent, CircleShape))
+        Text("★", color = accent, fontSize = 20.sp, fontWeight = FontWeight.Black)
         Spacer(Modifier.height(8.dp))
-        Text(value, color = TaskIdsColors.Ink, fontSize = 24.sp, fontWeight = FontWeight.Black)
-        Text(label, color = TaskIdsColors.Muted, fontSize = 10.sp)
+        Text(value, color = TaskIdsColors.Ink, fontSize = 21.sp, fontWeight = FontWeight.Black)
+        Text(label, color = TaskIdsColors.Muted, fontSize = 10.sp, maxLines = 1)
     }
 }
 
@@ -341,7 +411,7 @@ private fun QuickAction(text: String, color: Color, modifier: Modifier = Modifie
     Text(
         text,
         color = Color.White,
-        fontSize = 10.sp,
+        fontSize = 12.sp,
         fontWeight = FontWeight.Black,
         modifier = modifier
             .background(color, RoundedCornerShape(22.dp))

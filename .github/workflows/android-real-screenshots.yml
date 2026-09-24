@@ -4,11 +4,11 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - refactor/taskids-v2-ux-architecture
+      - refactor/taskids-full-visual
     paths:
       - ".github/workflows/android-real-screenshots.yml"
       - "scripts/capture_real_screenshots.sh"
-      - "app/src/main/java/com/example/ui/game/GameAvatar.kt"
+      - "app/src/main/**"
 
 jobs:
   screenshots:

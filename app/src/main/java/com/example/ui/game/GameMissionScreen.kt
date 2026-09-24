@@ -20,7 +20,14 @@ import com.example.ui.navigation.AppScreen
 import com.example.viewmodel.MainViewModel
 
 @Composable
-fun GameMissionScreen(
+fun GameMissionScreen(viewModel: MainViewModel, taskId: Int) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) ChildMobileMission(viewModel, taskId) else GameMissionLandscape(viewModel, taskId)
+    }
+}
+
+@Composable
+private fun GameMissionLandscape(
     viewModel: MainViewModel,
     taskId: Int
 ) {

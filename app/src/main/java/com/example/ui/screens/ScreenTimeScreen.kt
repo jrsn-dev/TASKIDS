@@ -17,10 +17,18 @@ import androidx.compose.ui.unit.sp
 import com.example.ui.components.PrimaryTvButton
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.game.RewardVectorIcon
+import com.example.ui.game.ChildMobileScreenTime
 import com.example.viewmodel.MainViewModel
 
 @Composable
 fun ScreenTimeScreen(viewModel: MainViewModel) {
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        if (maxWidth < 700.dp) ChildMobileScreenTime(viewModel) else ScreenTimeLandscape(viewModel)
+    }
+}
+
+@Composable
+private fun ScreenTimeLandscape(viewModel: MainViewModel) {
     val remaining by viewModel.screenTimeRemainingSeconds.collectAsState()
     val minutes = remaining / 60
     val seconds = remaining % 60
