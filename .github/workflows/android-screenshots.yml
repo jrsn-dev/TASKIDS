@@ -1,5 +1,5 @@
 name: Android real screenshots
-# Real emulator capture fixed
+# Real emulator capture fixed coordinates
 
 on:
   push:
@@ -51,55 +51,18 @@ jobs:
 
             adb exec-out screencap -p > screenshots/01-home-infantil.png
 
-            cat > /tmp/tap_text.py <<'PY'
-            import subprocess, sys, time, xml.etree.ElementTree as ET, re
-            target = sys.argv[1]
-            subprocess.run(["adb","shell","uiautomator","dump","/sdcard/window.xml"], check=True, stdout=subprocess.DEVNULL)
-            subprocess.run(["adb","pull","/sdcard/window.xml","/tmp/window.xml"], check=True, stdout=subprocess.DEVNULL)
-            root=ET.parse("/tmp/window.xml").getroot()
-            nodes=[]
-            for n in root.iter("node"):
-                text=n.attrib.get("text","")
-                desc=n.attrib.get("content-desc","")
-                if text==target or desc==target:
-                    b=n.attrib.get("bounds","")
-                    m=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", b)
-                    if m:
-                        x1,y1,x2,y2=map(int,m.groups())
-                        nodes.append(((x1+x2)//2,(y1+y2)//2,b,text,desc))
-            if not nodes:
-                print("NOT_FOUND", target)
-                subprocess.run(["adb","shell","uiautomator","dump","/sdcard/window.xml"])
-                sys.exit(2)
-            # Prefer the largest matching UI node. This avoids tapping small HUD text
-            # such as the star counter when looking for keypad digit "0".
-            def area(item):
-                b=item[2]
-                m=re.match(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", b)
-                if not m: return 0
-                x1,y1,x2,y2=map(int,m.groups())
-                return max(0,x2-x1)*max(0,y2-y1)
-            nodes.sort(key=area, reverse=True)
-            x,y,*_=nodes[0]
-            print("TAP", target, x, y, "bounds", nodes[0][2])
-            subprocess.run(["adb","shell","input","tap",str(x),str(y)], check=True)
-            time.sleep(1)
-            PY
-
-            python /tmp/tap_text.py PAIS
+            # Open parental PIN from the current 2400x1080 landscape Home.
+            adb shell input tap 2260 82
             sleep 2
             adb exec-out screencap -p > screenshots/02-pin-pais.png
 
-            python /tmp/tap_text.py 0
-            python /tmp/tap_text.py 0
-            python /tmp/tap_text.py 0
-            python /tmp/tap_text.py 0
+            # PIN padrão 0000. The zero key is centered at the bottom of the keypad.
+            adb shell input tap 1200 1045
+            adb shell input tap 1200 1045
+            adb shell input tap 1200 1045
+            adb shell input tap 1200 1045
             sleep 5
             adb exec-out screencap -p > screenshots/03-dashboard-pais-mobile.png
-
-            python /tmp/tap_text.py "ABRIR BIBLIOTECA"
-            sleep 3
-            adb exec-out screencap -p > screenshots/04-biblioteca.png
 
       - name: Upload real app screenshots
         if: always()
