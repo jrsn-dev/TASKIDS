@@ -32,7 +32,7 @@ jobs:
 
       - name: Commit generated PNG assets
         run: |
-          if git diff --quiet -- app/src/main/assets/ui; then
+          if [ -z "$(git status --porcelain -- app/src/main/assets/ui)" ]; then
             echo "Assets already up to date."
             exit 0
           fi
