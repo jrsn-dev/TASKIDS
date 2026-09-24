@@ -185,7 +185,7 @@ class LocalLink(private val repository: TaskRepository) {
                 icon = item.optString("icon", "🎁")
             ))
         }
-        currentRewards.filter { it.childId == childId && it.title !in rewardTitles }.forEach { repository.deleteReward(it) }
+        currentRewards.filter { it.title !in rewardTitles }.forEach { repository.deleteReward(it) }
         val currentRoutines = repository.listRoutines(childId)
         val routines = json.getJSONArray("routines")
         require(routines.length() <= 100)
