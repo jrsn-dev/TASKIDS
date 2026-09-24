@@ -12,6 +12,9 @@ interface ChildDao {
     @Query("SELECT * FROM children WHERE id = :id LIMIT 1")
     suspend fun getById(id: Long): Child?
 
+    @Query("SELECT * FROM children WHERE isActive = 1 AND name = :name LIMIT 1")
+    suspend fun findActiveByName(name: String): Child?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(child: Child): Long
 

@@ -130,11 +130,20 @@ tap_text "Missões" 10
 sleep 2
 capture "04-parent-missions.png"
 
+tap_text "Rotinas" 10
+capture "05-parent-routines.png"
+tap_text "Crianças" 10
+capture "06-parent-children.png"
+tap_text "Prêmios" 10
+capture "07-parent-rewards.png"
 adb shell input swipe 900 312 170 312 450
 sleep 2
 tap_text "Biblioteca" 10
-sleep 2
-capture "05-parent-library.png"
+capture "08-parent-library.png"
+tap_text "Conectar TV" 10
+capture "09-parent-pairing.png"
+tap_text "Ajustes" 10
+capture "10-parent-settings.png"
 
 echo "Real screenshots captured:"
 ls -lh real-screenshots

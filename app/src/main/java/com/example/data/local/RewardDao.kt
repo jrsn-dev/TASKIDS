@@ -10,6 +10,12 @@ interface RewardDao {
     @Query("SELECT * FROM rewards WHERE isEnabled = 1 AND (childId = 0 OR childId = :childId) ORDER BY costStars ASC")
     fun observeRewards(childId: Long): Flow<List<Reward>>
 
+    @Delete
+    suspend fun delete(item: Reward)
+
+    @Query("SELECT * FROM rewards WHERE (childId = 0 OR childId = :childId) AND isEnabled = 1 ORDER BY costStars ASC")
+    suspend fun listForChild(childId: Long): List<Reward>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(reward: Reward): Long
 

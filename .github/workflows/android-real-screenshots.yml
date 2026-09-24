@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - refactor/taskids-full-visual
+      - refactor/taskids-png-local-demo
     paths:
       - ".github/workflows/android-real-screenshots.yml"
       - "scripts/capture_real_screenshots.sh"
