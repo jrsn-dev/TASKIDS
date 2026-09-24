@@ -5,17 +5,23 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.R
 import com.example.game.GameEngine
-import com.example.game.GameThemeKey
 import com.example.model.Child
+import com.example.model.Task
 import com.example.model.TaskStatus
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.dialogs.ParentPinDialog
@@ -34,136 +40,81 @@ fun GameHomeScreen(viewModel: MainViewModel) {
     val completed = activeTasks.count { it.status == TaskStatus.COMPLETED }
     val nextMission = activeTasks.firstOrNull { it.status != TaskStatus.COMPLETED }
     val level = GameEngine.levelFor(current.totalXp)
-    val theme = GameThemeKey.from(current.gameTheme)
+    val progress = if (activeTasks.isEmpty()) 0f else completed.toFloat() / activeTasks.size.toFloat()
 
     var showPin by remember { mutableStateOf(false) }
 
-    Box(Modifier.fillMaxSize()) {
-        GameWorldBackground(theme = theme, modifier = Modifier.fillMaxSize())
-
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    listOf(Color(0xFFF8FBFF), Color(0xFFF2F6FF), Color(0xFFF9FAFF))
+                )
+            )
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 28.dp, vertical = 20.dp)
+                .padding(horizontal = 24.dp, vertical = 18.dp)
         ) {
-            GameHomeTopBar(
+            HomeTopBar(
                 children = children,
                 current = current,
                 onSelectProfile = { viewModel.selectChild(it) },
                 onParents = { showPin = true }
             )
 
-            Spacer(Modifier.height(18.dp))
+            Spacer(Modifier.height(16.dp))
 
             Row(
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(22.dp)
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                PlayerSummaryCard(
+                HomeHeroCard(
                     child = current,
                     levelTitle = level.title,
                     levelNumber = level.level,
+                    completed = completed,
+                    total = activeTasks.size,
+                    nextMission = nextMission,
                     modifier = Modifier
-                        .width(300.dp)
-                        .fillMaxHeight()
+                        .weight(1.45f)
+                        .fillMaxHeight(),
+                    onStartMission = {
+                        nextMission?.let(viewModel::selectTask)
+                    }
                 )
 
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .fillMaxHeight()
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
                 ) {
-                    JourneyHeader(
-                        child = current,
-                        unlockedAchievements = achievements.count { it.unlocked },
+                    TodayProgressCard(
                         completed = completed,
-                        total = activeTasks.size
+                        total = activeTasks.size,
+                        progress = progress,
+                        unlockedAchievements = achievements.count { it.unlocked },
+                        stars = current.totalStars,
+                        xp = current.totalXp,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(Modifier.height(14.dp))
-
-                    if (nextMission != null) {
-                        NextMissionCard(
-                            taskTitle = nextMission.title,
-                            iconKey = nextMission.iconKey,
-                            duration = nextMission.durationMinutes,
-                            stars = nextMission.rewardStars,
-                            xp = nextMission.rewardXp,
-                            onClick = { viewModel.selectTask(nextMission) }
-                        )
-                    } else if (activeTasks.isNotEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    TaskIdsColors.Green.copy(alpha = 0.28f),
-                                    RoundedCornerShape(22.dp)
-                                )
-                                .padding(18.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                "Jornada completa por hoje",
-                                color = Color.White,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 18.sp
-                            )
-                        }
-                    }
-
-                    Spacer(Modifier.height(16.dp))
-
-                    Box(
+                    MissionListCard(
+                        tasks = activeTasks,
                         modifier = Modifier
-                            .fillMaxWidth()
                             .weight(1f)
-                            .background(
-                                Color.Black.copy(alpha = 0.10f),
-                                RoundedCornerShape(28.dp)
-                            )
-                            .padding(14.dp)
-                    ) {
-                        AdventureMap(
-                            tasks = activeTasks,
-                            modifier = Modifier.fillMaxSize(),
-                            onMissionClick = { viewModel.selectTask(it) }
-                        )
-                    }
+                            .fillMaxWidth(),
+                        onMissionClick = viewModel::selectTask
+                    )
 
-                    Spacer(Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            "${completed} de ${activeTasks.size} missões concluídas",
-                            color = Color.White.copy(alpha = 0.78f),
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-
-                        Spacer(Modifier.weight(1f))
-
-                        Box(
-                            modifier = Modifier
-                                .background(
-                                    Color.White.copy(alpha = 0.12f),
-                                    RoundedCornerShape(16.dp)
-                                )
-                                .clickable { viewModel.navigateTo(AppScreen.Rewards) }
-                                .padding(horizontal = 16.dp, vertical = 10.dp)
-                        ) {
-                            Text(
-                                "RECOMPENSAS",
-                                color = Color.White,
-                                fontWeight = FontWeight.Black,
-                                fontSize = 11.sp
-                            )
-                        }
-                    }
+                    RewardsButton(
+                        onClick = { viewModel.navigateTo(AppScreen.Rewards) }
+                    )
                 }
             }
         }
@@ -182,7 +133,7 @@ fun GameHomeScreen(viewModel: MainViewModel) {
 }
 
 @Composable
-private fun GameHomeTopBar(
+private fun HomeTopBar(
     children: List<Child>,
     current: Child,
     onSelectProfile: (Long) -> Unit,
@@ -192,16 +143,14 @@ private fun GameHomeTopBar(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            StarIcon(Modifier.size(28.dp))
-            Spacer(Modifier.width(8.dp))
-            Text(
-                "TASKIDS",
-                color = Color.White,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black
-            )
-        }
+        androidx.compose.foundation.Image(
+            painter = painterResource(R.drawable.kids_task_logo_1780663813391),
+            contentDescription = "TASKIDS",
+            modifier = Modifier
+                .width(118.dp)
+                .height(42.dp),
+            contentScale = ContentScale.Fit
+        )
 
         Spacer(Modifier.weight(1f))
 
@@ -211,18 +160,17 @@ private fun GameHomeTopBar(
                 Box(
                     modifier = Modifier
                         .background(
-                            if (selected) Color.White.copy(alpha = 0.18f)
-                            else Color.Black.copy(alpha = 0.10f),
-                            RoundedCornerShape(16.dp)
+                            if (selected) TaskIdsColors.Ink else Color.White,
+                            RoundedCornerShape(18.dp)
                         )
                         .clickable { onSelectProfile(profile.id) }
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .padding(horizontal = 13.dp, vertical = 9.dp)
                 ) {
                     Text(
                         profile.name,
-                        color = Color.White,
+                        color = if (selected) Color.White else TaskIdsColors.Ink,
                         fontSize = 11.sp,
-                        fontWeight = if (selected) FontWeight.Black else FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
@@ -232,9 +180,9 @@ private fun GameHomeTopBar(
 
         Box(
             modifier = Modifier
-                .background(Color.Black.copy(alpha = 0.16f), RoundedCornerShape(16.dp))
+                .background(TaskIdsColors.Purple, RoundedCornerShape(18.dp))
                 .clickable(onClick = onParents)
-                .padding(horizontal = 15.dp, vertical = 9.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Text(
                 "PAIS",
@@ -247,223 +195,294 @@ private fun GameHomeTopBar(
 }
 
 @Composable
-private fun PlayerSummaryCard(
+private fun HomeHeroCard(
     child: Child,
     levelTitle: String,
     levelNumber: Int,
+    completed: Int,
+    total: Int,
+    nextMission: Task?,
+    modifier: Modifier = Modifier,
+    onStartMission: () -> Unit
+) {
+    Row(
+        modifier = modifier
+            .shadow(14.dp, RoundedCornerShape(34.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(Color.White, Color(0xFFF5F1FF), Color(0xFFEAF5FF))
+                ),
+                RoundedCornerShape(34.dp)
+            )
+            .padding(24.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1.15f)) {
+            Text(
+                "Oi, ${child.name}!",
+                color = TaskIdsColors.Purple,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Black
+            )
+
+            Spacer(Modifier.height(4.dp))
+
+            Text(
+                "Pronto para sua próxima conquista?",
+                color = TaskIdsColors.Ink,
+                fontSize = 30.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.Black
+            )
+
+            Spacer(Modifier.height(14.dp))
+
+            Text(
+                "$levelTitle • Nível $levelNumber",
+                color = TaskIdsColors.Muted,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Spacer(Modifier.height(14.dp))
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeroMetric(child.totalStars.toString(), "estrelas", TaskIdsColors.Yellow)
+                HeroMetric(child.totalXp.toString(), "XP", TaskIdsColors.Blue)
+                HeroMetric("$completed/$total", "hoje", TaskIdsColors.Green)
+            }
+
+            Spacer(Modifier.height(18.dp))
+
+            if (nextMission != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.White.copy(alpha = 0.88f), RoundedCornerShape(22.dp))
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        "Sua próxima missão",
+                        color = TaskIdsColors.Muted,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(3.dp))
+                    Text(
+                        nextMission.title,
+                        color = TaskIdsColors.Ink,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                    Text(
+                        "${nextMission.durationMinutes} min • +${nextMission.rewardStars} estrelas • +${nextMission.rewardXp} XP",
+                        color = TaskIdsColors.Muted,
+                        fontSize = 11.sp
+                    )
+
+                    Spacer(Modifier.height(12.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .background(TaskIdsColors.Ink, RoundedCornerShape(16.dp))
+                            .clickable(onClick = onStartMission)
+                            .padding(horizontal = 20.dp, vertical = 12.dp)
+                    ) {
+                        Text(
+                            "COMEÇAR AGORA",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    if (total > 0) "Você concluiu tudo por hoje." else "As missões vão aparecer aqui.",
+                    color = TaskIdsColors.Green,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
+        Spacer(Modifier.width(18.dp))
+
+        Box(
+            modifier = Modifier
+                .width(250.dp)
+                .fillMaxHeight()
+                .background(
+                    Brush.verticalGradient(listOf(Color(0xFFE9F5FF), Color(0xFFF2ECFF))),
+                    RoundedCornerShape(28.dp)
+                ),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(180.dp)
+                    .align(Alignment.Center)
+                    .background(Color.White.copy(alpha = 0.55f), CircleShape)
+            )
+
+            GameAvatar(
+                child = child,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(top = 18.dp, start = 10.dp, end = 10.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun HeroMetric(value: String, label: String, accent: Color) {
+    Row(
+        modifier = Modifier
+            .background(Color.White.copy(alpha = 0.86f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 12.dp, vertical = 9.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(Modifier.size(8.dp).background(accent, CircleShape))
+        Spacer(Modifier.width(7.dp))
+        Column {
+            Text(value, color = TaskIdsColors.Ink, fontSize = 15.sp, fontWeight = FontWeight.Black)
+            Text(label, color = TaskIdsColors.Muted, fontSize = 9.sp)
+        }
+    }
+}
+
+@Composable
+private fun TodayProgressCard(
+    completed: Int,
+    total: Int,
+    progress: Float,
+    unlockedAchievements: Int,
+    stars: Int,
+    xp: Int,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
-            .background(
-                Color.Black.copy(alpha = 0.14f),
-                RoundedCornerShape(28.dp)
-            )
-            .padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .shadow(8.dp, RoundedCornerShape(26.dp))
+            .background(Color.White, RoundedCornerShape(26.dp))
+            .padding(18.dp)
     ) {
-        Text(
-            "OLÁ, ${child.name.uppercase()}",
-            color = Color.White.copy(alpha = 0.68f),
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Black
+        Text("Progresso de hoje", color = TaskIdsColors.Ink, fontSize = 18.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(9.dp))
+        LinearProgressIndicator(
+            progress = { progress.coerceIn(0f, 1f) },
+            modifier = Modifier.fillMaxWidth().height(10.dp),
+            color = TaskIdsColors.Purple,
+            trackColor = Color(0xFFE9EDF6)
         )
-
-        Spacer(Modifier.height(4.dp))
-
-        Text(
-            levelTitle,
-            color = Color.White,
-            fontSize = 21.sp,
-            fontWeight = FontWeight.Black
-        )
-
-        Spacer(Modifier.height(8.dp))
-
-        GameAvatar(
-            child = child,
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-        )
-
-        Spacer(Modifier.height(10.dp))
-
-        LevelHud(
-            child = child,
-            modifier = Modifier.fillMaxWidth()
-        )
-
+        Spacer(Modifier.height(9.dp))
+        Text("$completed de $total missões concluídas", color = TaskIdsColors.Muted, fontSize = 11.sp)
         Spacer(Modifier.height(12.dp))
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            GameStatPill(
-                label = "COMBO",
-                value = "x${child.currentCombo}",
-                modifier = Modifier.weight(1f),
-                accent = TaskIdsColors.Orange
-            )
-            GameStatPill(
-                label = "STREAK",
-                value = "${child.currentStreak}d",
-                modifier = Modifier.weight(1f),
-                accent = TaskIdsColors.Green
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            SmallStat("Conquistas", unlockedAchievements.toString(), Modifier.weight(1f))
+            SmallStat("Estrelas", stars.toString(), Modifier.weight(1f))
+            SmallStat("XP", xp.toString(), Modifier.weight(1f))
         }
-
-        Spacer(Modifier.height(8.dp))
-
-        Text(
-            "NÍVEL $levelNumber",
-            color = TaskIdsColors.Yellow,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Black
-        )
     }
 }
 
 @Composable
-private fun JourneyHeader(
-    child: Child,
-    unlockedAchievements: Int,
-    completed: Int,
-    total: Int
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+private fun SmallStat(label: String, value: String, modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .background(TaskIdsColors.SoftBg, RoundedCornerShape(15.dp))
+            .padding(10.dp)
     ) {
-        Column {
-            Text(
-                "Jornada de hoje",
-                color = Color.White,
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                "Escolha a próxima missão e avance pelo mapa.",
-                color = Color.White.copy(alpha = 0.68f),
-                fontSize = 12.sp
-            )
-        }
-
-        Spacer(Modifier.weight(1f))
-
-        CompactHomeStat(
-            label = "ESTRELAS",
-            value = child.totalStars.toString(),
-            accent = TaskIdsColors.Yellow
-        )
-        Spacer(Modifier.width(8.dp))
-        CompactHomeStat(
-            label = "CONQUISTAS",
-            value = unlockedAchievements.toString(),
-            accent = TaskIdsColors.Purple
-        )
-        Spacer(Modifier.width(8.dp))
-        CompactHomeStat(
-            label = "HOJE",
-            value = "$completed/$total",
-            accent = TaskIdsColors.Green
-        )
+        Text(value, color = TaskIdsColors.Ink, fontSize = 15.sp, fontWeight = FontWeight.Black)
+        Text(label, color = TaskIdsColors.Muted, fontSize = 8.sp)
     }
 }
 
 @Composable
-private fun CompactHomeStat(
-    label: String,
-    value: String,
-    accent: Color
+private fun MissionListCard(
+    tasks: List<Task>,
+    modifier: Modifier = Modifier,
+    onMissionClick: (Task) -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .width(92.dp)
-            .background(Color.Black.copy(alpha = 0.12f), RoundedCornerShape(18.dp))
-            .padding(horizontal = 12.dp, vertical = 9.dp)
+        modifier = modifier
+            .shadow(8.dp, RoundedCornerShape(26.dp))
+            .background(Color.White, RoundedCornerShape(26.dp))
+            .padding(18.dp)
     ) {
-        Box(Modifier.size(7.dp).background(accent, CircleShape))
-        Spacer(Modifier.height(4.dp))
-        Text(
-            value,
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Black
-        )
-        Text(
-            label,
-            color = Color.White.copy(alpha = 0.58f),
-            fontSize = 8.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text("Missões de hoje", color = TaskIdsColors.Ink, fontSize = 18.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.height(10.dp))
+
+        if (tasks.isEmpty()) {
+            Text("Nenhuma missão ativa.", color = TaskIdsColors.Muted, fontSize = 12.sp)
+        } else {
+            tasks.take(4).forEachIndexed { index, task ->
+                val done = task.status == TaskStatus.COMPLETED
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(enabled = !done) { onMissionClick(task) }
+                        .padding(vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .background(
+                                if (done) Color(0xFFE2F6E9) else when (index % 3) {
+                                    0 -> Color(0xFFEAF3FF)
+                                    1 -> Color(0xFFF2ECFF)
+                                    else -> Color(0xFFFFF3D8)
+                                },
+                                CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            if (done) "✓" else "${index + 1}",
+                            color = if (done) TaskIdsColors.Green else TaskIdsColors.Ink,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+
+                    Spacer(Modifier.width(10.dp))
+
+                    Column(Modifier.weight(1f)) {
+                        Text(task.title, color = TaskIdsColors.Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "${task.durationMinutes} min • +${task.rewardXp} XP",
+                            color = TaskIdsColors.Muted,
+                            fontSize = 9.sp
+                        )
+                    }
+
+                    Text(
+                        if (done) "CONCLUÍDA" else "ABRIR",
+                        color = if (done) TaskIdsColors.Green else TaskIdsColors.Purple,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black
+                    )
+                }
+            }
+        }
     }
 }
 
 @Composable
-private fun NextMissionCard(
-    taskTitle: String,
-    iconKey: String,
-    duration: Int,
-    stars: Int,
-    xp: Int,
-    onClick: () -> Unit
-) {
+private fun RewardsButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White.copy(alpha = 0.12f), RoundedCornerShape(24.dp))
+            .background(TaskIdsColors.Ink, RoundedCornerShape(20.dp))
             .clickable(onClick = onClick)
-            .padding(16.dp),
+            .padding(horizontal = 18.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(58.dp)
-                .background(TaskIdsColors.Yellow, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            GameIcon(
-                key = iconKey,
-                modifier = Modifier.size(34.dp),
-                tint = TaskIdsColors.Ink
-            )
-        }
-
-        Spacer(Modifier.width(14.dp))
-
-        Column(Modifier.weight(1f)) {
-            Text(
-                "PRÓXIMA MISSÃO",
-                color = Color.White.copy(alpha = 0.56f),
-                fontSize = 9.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                taskTitle,
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Black
-            )
-            Text(
-                "$duration min  •  +$stars estrelas  •  +$xp XP",
-                color = Color.White.copy(alpha = 0.74f),
-                fontSize = 11.sp
-            )
-        }
-
-        Box(
-            modifier = Modifier
-                .background(TaskIdsColors.Yellow, RoundedCornerShape(16.dp))
-                .padding(horizontal = 18.dp, vertical = 11.dp)
-        ) {
-            Text(
-                "COMEÇAR",
-                color = TaskIdsColors.Ink,
-                fontWeight = FontWeight.Black,
-                fontSize = 11.sp
-            )
-        }
+        Text("Ver recompensas", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Black)
+        Spacer(Modifier.weight(1f))
+        Text("→", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Black)
     }
 }
