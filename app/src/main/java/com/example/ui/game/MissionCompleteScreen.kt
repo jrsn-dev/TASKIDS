@@ -71,11 +71,13 @@ fun MissionCompleteScreen(viewModel: MainViewModel) {
                 modifier = Modifier
                     .width(300.dp)
                     .fillMaxHeight()
-                    .background(Color.Black.copy(alpha = 0.16f), RoundedCornerShape(30.dp))
+                    .background(Color.White.copy(alpha = 0.94f), RoundedCornerShape(30.dp))
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(Modifier.weight(1f))
+
+                MascotStar(Modifier.size(70.dp))
 
                 GameAvatar(
                     child = current,
@@ -96,7 +98,7 @@ fun MissionCompleteScreen(viewModel: MainViewModel) {
 
                 Text(
                     result?.taskTitle ?: "Muito bem!",
-                    color = Color.White,
+                    color = TaskIdsColors.Ink,
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
@@ -229,6 +231,6 @@ private fun BonusChip(label: String, value: String) {
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
         Text(label, color = TaskIdsColors.Yellow, fontSize = 9.sp, fontWeight = FontWeight.Black)
-        Text(value, color = Color.White, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+        Text(value, color = TaskIdsColors.Ink, fontSize = 12.sp, fontWeight = FontWeight.Bold)
     }
 }

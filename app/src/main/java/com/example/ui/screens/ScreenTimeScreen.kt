@@ -106,7 +106,7 @@ fun ScreenTimeScreen(viewModel: MainViewModel) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Aqui entram apenas vídeos, apps ou experiências previamente aprovados na Área dos Pais. O navegador aberto foi removido da experiência infantil.",
+                    "Aproveite este momento! Quando o tempo terminar, você poderá continuar suas missões.",
                     color = TaskIdsColors.Ink,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,

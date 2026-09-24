@@ -51,8 +51,8 @@ fun GameAvatar(
     )
 
     val assetName = when (child.avatarCharacter.uppercase()) {
-        "GIRL" -> "avatar_girl_base.png"
-        else -> "avatar_boy_base.png"
+        "GIRL" -> "avatar_girl.webp"
+        else -> "avatar_boy.webp"
     }
 
     val context = LocalContext.current

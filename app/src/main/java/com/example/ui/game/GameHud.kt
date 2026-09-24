@@ -26,7 +26,7 @@ fun LevelHud(
 
     Column(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.18f), RoundedCornerShape(22.dp))
+            .background(Color.White.copy(alpha = 0.94f), RoundedCornerShape(22.dp))
             .padding(14.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -42,13 +42,13 @@ fun LevelHud(
             Column {
                 Text(
                     level.title,
-                    color = Color.White,
+                    color = TaskIdsColors.Ink,
                     fontWeight = FontWeight.Black,
                     fontSize = 15.sp
                 )
                 Text(
                     "${level.currentXp} / 500 XP",
-                    color = Color.White.copy(alpha = 0.65f),
+                    color = TaskIdsColors.Muted,
                     fontSize = 10.sp
                 )
             }
@@ -62,7 +62,7 @@ fun LevelHud(
                 .fillMaxWidth()
                 .height(10.dp),
             color = TaskIdsColors.Yellow,
-            trackColor = Color.White.copy(alpha = 0.15f)
+            trackColor = TaskIdsColors.SoftBlue
         )
     }
 }
@@ -76,14 +76,14 @@ fun GameStatPill(
 ) {
     Row(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.18f), RoundedCornerShape(20.dp))
+            .background(Color.White.copy(alpha = 0.94f), RoundedCornerShape(20.dp))
             .padding(horizontal = 14.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(Modifier.size(9.dp).background(accent, CircleShape))
         Spacer(Modifier.width(8.dp))
-        Text(label, color = Color.White.copy(alpha = 0.65f), fontSize = 10.sp)
+        Text(label, color = TaskIdsColors.Muted, fontSize = 10.sp)
         Spacer(Modifier.width(6.dp))
-        Text(value, color = Color.White, fontWeight = FontWeight.Black, fontSize = 13.sp)
+        Text(value, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black, fontSize = 13.sp)
     }
 }

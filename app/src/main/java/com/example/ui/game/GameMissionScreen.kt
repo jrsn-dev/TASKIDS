@@ -48,13 +48,13 @@ fun GameMissionScreen(
                 modifier = Modifier
                     .width(300.dp)
                     .fillMaxHeight()
-                    .background(Color.Black.copy(alpha = 0.16f), RoundedCornerShape(30.dp))
+                    .background(Color.White.copy(alpha = 0.94f), RoundedCornerShape(30.dp))
                     .padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     "MISSÃO EM ANDAMENTO",
-                    color = Color.White.copy(alpha = 0.55f),
+                    color = TaskIdsColors.Muted,
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold
                 )
@@ -78,7 +78,7 @@ fun GameMissionScreen(
 
                 Text(
                     task.title,
-                    color = Color.White,
+                    color = TaskIdsColors.Ink,
                     fontSize = 26.sp,
                     fontWeight = FontWeight.Black,
                     textAlign = TextAlign.Center
@@ -86,7 +86,7 @@ fun GameMissionScreen(
 
                 Text(
                     task.description,
-                    color = Color.White.copy(alpha = 0.68f),
+                    color = TaskIdsColors.Muted,
                     fontSize = 12.sp,
                     textAlign = TextAlign.Center
                 )
