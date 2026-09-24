@@ -130,13 +130,9 @@ tap_text "Missões" 10
 sleep 2
 capture "04-parent-missions.png"
 
-tap_text "Mais" 10
+adb shell input swipe 900 312 170 312 450
 sleep 2
-if ! tap_text "Biblioteca" 6; then
-  adb shell input swipe 900 220 120 220 500 || true
-  sleep 2
-  tap_text "Biblioteca" 6
-fi
+tap_text "Biblioteca" 10
 sleep 2
 capture "05-parent-library.png"
 

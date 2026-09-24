@@ -245,7 +245,8 @@ private fun MobileParentHeader(child: Child?, onExit: () -> Unit) {
             .padding(horizontal = 18.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TaskIdsWordmark()
+        Box(Modifier.background(Color.White.copy(alpha = 0.82f), RoundedCornerShape(14.dp))
+            .padding(horizontal = 5.dp, vertical = 2.dp)) { TaskIdsWordmark() }
         Spacer(Modifier.weight(1f))
         Text(
             "Sair",
@@ -476,7 +477,12 @@ private fun MobileMissions(
                     .padding(14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                GameIcon(task.iconKey, Modifier.size(34.dp), TaskIdsColors.Blue)
+                Box(Modifier.size(50.dp).background(TaskIdsColors.SoftBlue, RoundedCornerShape(16.dp)),
+                    contentAlignment = Alignment.Center) {
+                    if (task.iconKey == "BOOK") Image(painterResource(R.drawable.mission_book), null,
+                        Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                    else GameIcon(task.iconKey, Modifier.size(30.dp), TaskIdsColors.Blue)
+                }
                 Spacer(Modifier.width(10.dp))
                 Column(Modifier.weight(1f)) {
                     Text(task.title, color = TaskIdsColors.Ink, fontWeight = FontWeight.Black)
