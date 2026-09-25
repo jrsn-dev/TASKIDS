@@ -17,7 +17,7 @@ import com.example.game.GameThemeKey
 /** Shared artwork from the TASKIDS visual direction. Content sits above this image. */
 @Composable
 fun GameWorldBackground(@Suppress("UNUSED_PARAMETER") theme: GameThemeKey, modifier: Modifier = Modifier) {
-    BoxWithConstraints(modifier) {
+    BoxWithConstraints(modifier.background(Color(0xFFF5F8FF))) {
         val portrait = maxHeight > maxWidth
         Image(
             painter = painterResource(if (portrait) R.drawable.sky_scene_portrait else R.drawable.sky_scene_landscape),

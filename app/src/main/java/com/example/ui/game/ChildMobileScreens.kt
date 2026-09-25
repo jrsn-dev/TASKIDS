@@ -23,6 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
@@ -100,7 +102,8 @@ private fun ChildBottomBar(active: String, onHome: () -> Unit, onMissions: () ->
                 Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(onClick = click).padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(painterResource(icon), label, modifier = Modifier.size(28.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
+                if (label == "Recompensas") RewardArt("CUSTOM", Modifier.size(28.dp).graphicsLayer { alpha = if (selected) 1f else 0.65f })
+                else Image(painterResource(icon), label, modifier = Modifier.size(28.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
                 Spacer(Modifier.height(2.dp))
                 Text(label, color = if (selected) TaskIdsColors.Blue else muted, fontSize = 12.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
@@ -122,6 +125,8 @@ fun ChildMobileHome(viewModel: MainViewModel) {
     val child by viewModel.currentChild.collectAsState()
     val tasks by viewModel.tasks.collectAsState()
     val current = child ?: return
+    val compact = LocalConfiguration.current.screenHeightDp < 800
+    val heroHeight = if (compact) 160.dp else 228.dp
     val active = tasks.filter { it.isActive }
     val completed = active.count { it.status == TaskStatus.COMPLETED }
     val next = active.firstOrNull { it.status != TaskStatus.COMPLETED }
@@ -147,8 +152,8 @@ fun ChildMobileHome(viewModel: MainViewModel) {
                     }
                 } else {
                     item {
-                        Box(Modifier.fillMaxWidth().height(228.dp)) {
-                            GameAvatar(current, Modifier.align(Alignment.BottomEnd).width(230.dp).height(232.dp).offset(x = 23.dp))
+                        Box(Modifier.fillMaxWidth().height(heroHeight).clipToBounds()) {
+                            GameAvatar(current, Modifier.align(Alignment.TopEnd).width(230.dp).height(232.dp).offset(x = 23.dp))
                             Column(Modifier.align(Alignment.BottomStart).width(176.dp).padding(bottom = 14.dp)) {
                                 Text("Oi, ${current.name}!", color = navy, fontSize = 34.sp, lineHeight = 37.sp, fontWeight = FontWeight.Black)
                                 Spacer(Modifier.height(8.dp))
@@ -163,7 +168,7 @@ fun ChildMobileHome(viewModel: MainViewModel) {
                                 LinearProgressIndicator({ progress }, Modifier.weight(1f).height(20.dp).clip(CircleShape),
                                     color = TaskIdsColors.Green, trackColor = Color(0xFFE6EDFF))
                                 Spacer(Modifier.width(14.dp))
-                                RewardArt("CUSTOM", Modifier.size(52.dp))
+                                RewardArt("CUSTOM", Modifier.size(if (compact) 40.dp else 52.dp))
                             }
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                                 Text("$completed de ${active.size} missões concluídas", color = muted, fontSize = 14.sp)
@@ -215,7 +220,7 @@ fun ChildMobileHome(viewModel: MainViewModel) {
 
 @Composable
 private fun SmallMetric(icon: String, value: String, label: String, accent: Color, modifier: Modifier) {
-    Column(modifier.background(Color.White.copy(alpha = 0.95f), cardShape).padding(horizontal = 8.dp, vertical = 16.dp),
+    Column(modifier.background(Color.White.copy(alpha = 0.95f), cardShape).padding(horizontal = 8.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (icon == "★") Image(painterResource(R.drawable.nav_star), null, Modifier.size(31.dp))
@@ -360,8 +365,8 @@ fun ChildMobileRewards(viewModel: MainViewModel) {
                     Spacer(Modifier.weight(1f)); TaskIdsWordmark()
                 }
                 ParentLibraryContent(Modifier.weight(1f).padding(horizontal = 16.dp))
-            } else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                item { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TaskIdsWordmark(Modifier.width(195.dp).height(52.dp)) } }
+            } else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                item { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TaskIdsWordmark(Modifier.width(195.dp).height(46.dp)) } }
                 item {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text("Recompensas", color = navy, fontSize = 30.sp, fontWeight = FontWeight.Black, modifier = Modifier.weight(1f))
@@ -398,7 +403,7 @@ fun ChildMobileRewards(viewModel: MainViewModel) {
                                     .background(Brush.verticalGradient(colors), RoundedCornerShape(23.dp))
                                     .clickable { viewModel.redeemReward(reward) }.padding(12.dp),
                                     horizontalAlignment = Alignment.CenterHorizontally) {
-                                    RewardArt(reward.type, Modifier.fillMaxWidth().height(130.dp))
+                                    RewardArt(reward.type, Modifier.fillMaxWidth().height(112.dp))
                                     Row(Modifier.fillMaxWidth().background(Color(0xFFFFF9D9), CircleShape).padding(vertical = 8.dp),
                                         horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
                                         Image(painterResource(R.drawable.nav_star), null, Modifier.size(23.dp))

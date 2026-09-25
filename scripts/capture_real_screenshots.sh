@@ -123,10 +123,10 @@ tap_text "PAIS" 15
 sleep 2
 capture "02-parent-pin.png"
 
-tap_text "0" 10
-tap_text "0" 10
-tap_text "0" 10
-tap_text "0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
 sleep 5
 tap_text_optional "Wait"
 capture "03-parent-dashboard.png"
