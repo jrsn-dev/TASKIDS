@@ -6,6 +6,7 @@ on:
     branches:
       - refactor/taskids-full-visual
       - refactor/taskids-png-local-demo
+      - refactor/taskids-reference-layout
     paths:
       - ".github/workflows/android-real-screenshots.yml"
       - "scripts/capture_real_screenshots.sh"

@@ -1,6 +1,9 @@
 package com.example.ui.game
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +24,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
@@ -42,6 +47,7 @@ import com.example.ui.components.TaskIdsWordmark
 import com.example.ui.design.TaskIdsColors
 import com.example.ui.dialogs.ParentPinDialog
 import com.example.ui.navigation.AppScreen
+import com.example.ui.library.ParentLibraryContent
 import com.example.viewmodel.MainViewModel
 
 private val navy = TaskIdsColors.Ink
@@ -58,25 +64,18 @@ private fun ChildBackdrop(child: Child?, content: @Composable BoxScope.() -> Uni
 
 @Composable
 private fun WhiteCard(modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
-    Column(modifier.background(Color.White.copy(alpha = 0.97f), cardShape).padding(14.dp), content = content)
+    Column(modifier.shadow(8.dp, cardShape, ambientColor = Color(0xFFE0E7FC), spotColor = Color(0xFFE0E7FC)).background(Color.White.copy(alpha = 0.97f), cardShape).padding(16.dp), content = content)
 }
 
 @Composable
 private fun BrandHeader(child: Child?, onParents: () -> Unit) {
-    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Box(Modifier.background(Color.White.copy(alpha = 0.82f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 5.dp, vertical = 2.dp)) { TaskIdsWordmark() }
+    Row(Modifier.fillMaxWidth().height(60.dp), verticalAlignment = Alignment.CenterVertically) {
+        TaskIdsWordmark(Modifier.width(184.dp).height(48.dp))
         Spacer(Modifier.weight(1f))
-        Row(
-            Modifier.background(Color.White, CircleShape).padding(horizontal = 10.dp, vertical = 7.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(painterResource(R.drawable.nav_star), contentDescription = null, modifier = Modifier.size(22.dp))
-            Spacer(Modifier.width(4.dp))
-            Text("${child?.totalStars ?: 0}", color = navy, fontSize = 16.sp, fontWeight = FontWeight.Black)
-        }
-        Spacer(Modifier.width(8.dp))
-        Box(Modifier.size(40.dp).clip(CircleShape).background(Color.White)
+        Image(painterResource(R.drawable.game_badge), "Conquistas", Modifier.size(44.dp))
+        Spacer(Modifier.width(9.dp))
+        Box(Modifier.size(49.dp).clip(CircleShape).background(Color(0xFFD5F0FF))
+            .border(2.dp, Color(0xFF7AC7FF), CircleShape)
             .semantics { contentDescription = "PAIS" }.clickable(onClick = onParents)) {
             if (child != null) GameAvatar(child, Modifier.fillMaxSize())
         }
@@ -87,7 +86,7 @@ private fun BrandHeader(child: Child?, onParents: () -> Unit) {
 private fun ChildBottomBar(active: String, onHome: () -> Unit, onMissions: () -> Unit, onRewards: () -> Unit, onMore: () -> Unit) {
     Row(
         Modifier.fillMaxWidth().background(Color.White, RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp))
-            .navigationBarsPadding().padding(vertical = 9.dp, horizontal = 8.dp),
+            .navigationBarsPadding().padding(vertical = 12.dp, horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
         listOf(
@@ -101,9 +100,9 @@ private fun ChildBottomBar(active: String, onHome: () -> Unit, onMissions: () ->
                 Modifier.weight(1f).clip(RoundedCornerShape(14.dp)).clickable(onClick = click).padding(vertical = 4.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Image(painterResource(icon), label, modifier = Modifier.size(24.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
+                Image(painterResource(icon), label, modifier = Modifier.size(28.dp).then(if (selected) Modifier else Modifier.graphicsLayer { alpha = 0.55f }))
                 Spacer(Modifier.height(2.dp))
-                Text(label, color = if (selected) TaskIdsColors.Blue else muted, fontSize = 10.sp,
+                Text(label, color = if (selected) TaskIdsColors.Blue else muted, fontSize = 12.sp,
                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium, maxLines = 1)
             }
         }
@@ -112,9 +111,9 @@ private fun ChildBottomBar(active: String, onHome: () -> Unit, onMissions: () ->
 
 @Composable
 private fun RoundedAction(text: String, color: Color, modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Box(modifier.clip(RoundedCornerShape(22.dp)).background(color).clickable(onClick = onClick)
+    Box(modifier.shadow(8.dp, CircleShape, spotColor = color.copy(alpha = 0.25f)).clip(CircleShape).background(Brush.verticalGradient(listOf(color.copy(alpha = 0.80f), color))).clickable(onClick = onClick)
         .padding(horizontal = 16.dp, vertical = 15.dp), contentAlignment = Alignment.Center) {
-        Text(text, color = Color.White, fontWeight = FontWeight.Black, fontSize = 15.sp, textAlign = TextAlign.Center)
+        Text(text, color = Color.White, fontWeight = FontWeight.Black, fontSize = 18.sp, textAlign = TextAlign.Center)
     }
 }
 
@@ -135,7 +134,7 @@ fun ChildMobileHome(viewModel: MainViewModel) {
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 12.dp, bottom = 24.dp),
-                verticalArrangement = Arrangement.spacedBy(9.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item { BrandHeader(current) { showPin = true } }
                 if (showMissions) {
@@ -148,29 +147,32 @@ fun ChildMobileHome(viewModel: MainViewModel) {
                     }
                 } else {
                     item {
-                        Row(Modifier.fillMaxWidth().height(147.dp), verticalAlignment = Alignment.Bottom) {
-                            Column(Modifier.weight(1f).padding(bottom = 8.dp)) {
-                                Text("Oi, ${current.name}!", color = navy, fontSize = 28.sp, fontWeight = FontWeight.Black)
-                                Text("Pronto para sua próxima conquista?", color = navy, fontSize = 16.sp, lineHeight = 19.sp)
+                        Box(Modifier.fillMaxWidth().height(228.dp)) {
+                            GameAvatar(current, Modifier.align(Alignment.BottomEnd).width(230.dp).height(232.dp).offset(x = 23.dp))
+                            Column(Modifier.align(Alignment.BottomStart).width(176.dp).padding(bottom = 14.dp)) {
+                                Text("Oi, ${current.name}!", color = navy, fontSize = 34.sp, lineHeight = 37.sp, fontWeight = FontWeight.Black)
+                                Spacer(Modifier.height(8.dp))
+                                Text("Pronto para\nsua próxima\nconquista?", color = navy, fontSize = 20.sp, lineHeight = 25.sp)
                             }
-                            GameAvatar(current, Modifier.width(147.dp).fillMaxHeight())
                         }
                     }
                     item {
                         WhiteCard(Modifier.fillMaxWidth()) {
-                            Text("Seu progresso de hoje", color = navy, fontSize = 18.sp, fontWeight = FontWeight.Black)
-                            Spacer(Modifier.height(9.dp))
-                            LinearProgressIndicator({ progress }, Modifier.fillMaxWidth().height(13.dp).clip(CircleShape),
-                                color = TaskIdsColors.Green, trackColor = TaskIdsColors.SoftBlue)
-                            Spacer(Modifier.height(7.dp))
+                            Text("Seu progresso de hoje", color = navy, fontSize = 20.sp, fontWeight = FontWeight.Black)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                LinearProgressIndicator({ progress }, Modifier.weight(1f).height(20.dp).clip(CircleShape),
+                                    color = TaskIdsColors.Green, trackColor = Color(0xFFE6EDFF))
+                                Spacer(Modifier.width(14.dp))
+                                RewardArt("CUSTOM", Modifier.size(52.dp))
+                            }
                             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                                Text("$completed de ${active.size} missões concluídas", color = muted, fontSize = 13.sp)
-                                Text("${(progress * 100).toInt()}%", color = TaskIdsColors.Blue, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                                Text("$completed de ${active.size} missões concluídas", color = muted, fontSize = 14.sp)
+                                Text("${(progress * 100).toInt()}%", color = TaskIdsColors.Blue, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                     item {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                             SmallMetric("★", current.totalStars.toString(), "Estrelas", TaskIdsColors.Yellow, Modifier.weight(1f))
                             SmallMetric("ϟ", current.totalXp.toString(), "XP", TaskIdsColors.Blue, Modifier.weight(1f))
                             SmallMetric("◎", completed.toString(), "Conquistas", TaskIdsColors.Pink, Modifier.weight(1f))
@@ -184,9 +186,14 @@ fun ChildMobileHome(viewModel: MainViewModel) {
                                 Spacer(Modifier.width(10.dp))
                                 Column(Modifier.weight(1f)) {
                                     Text(next.title, color = navy, fontSize = 18.sp, fontWeight = FontWeight.Black, maxLines = 2)
-                                    Text("${next.durationMinutes} min  •  ★ ${next.rewardStars}", color = muted, fontSize = 13.sp)
+                                    Text("◷ ${next.durationMinutes} min", color = muted, fontSize = 16.sp)
+                                    Spacer(Modifier.height(6.dp))
+                                    Row {
+                                        repeat(3) { Image(painterResource(R.drawable.nav_star), null, Modifier.size(23.dp)) }
+                                        Text(" +${next.rewardStars}", color = muted, fontSize = 12.sp)
+                                    }
                                 }
-                                Box(Modifier.size(48.dp).clip(CircleShape).background(TaskIdsColors.Blue)
+                                Box(Modifier.size(62.dp).clip(CircleShape).background(Brush.verticalGradient(listOf(Color(0xFF28BBFF), TaskIdsColors.Blue)))
                                     .clickable { viewModel.selectTask(next) }, contentAlignment = Alignment.Center) {
                                     Text("▶", color = Color.White, fontSize = 21.sp)
                                 }
@@ -208,10 +215,16 @@ fun ChildMobileHome(viewModel: MainViewModel) {
 
 @Composable
 private fun SmallMetric(icon: String, value: String, label: String, accent: Color, modifier: Modifier) {
-    WhiteCard(modifier) {
-        Text(icon, color = accent, fontSize = 21.sp, fontWeight = FontWeight.Black)
-        Text(value, color = navy, fontSize = 19.sp, fontWeight = FontWeight.Black)
-        Text(label, color = muted, fontSize = 10.sp, maxLines = 1)
+    Column(modifier.background(Color.White.copy(alpha = 0.95f), cardShape).padding(horizontal = 8.dp, vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (icon == "★") Image(painterResource(R.drawable.nav_star), null, Modifier.size(31.dp))
+            else Text(icon, color = accent, fontSize = 30.sp, fontWeight = FontWeight.Black)
+            Spacer(Modifier.width(5.dp))
+            Text(value, color = navy, fontSize = 24.sp, fontWeight = FontWeight.Black)
+        }
+        Spacer(Modifier.height(5.dp))
+        Text(label, color = muted, fontSize = 13.sp, maxLines = 1)
     }
 }
 
@@ -331,32 +344,107 @@ fun ChildMobileRewards(viewModel: MainViewModel) {
     val child by viewModel.currentChild.collectAsState()
     val rewards by viewModel.rewards.collectAsState()
     val message by viewModel.lastRewardMessage.collectAsState()
+    var category by remember { mutableStateOf("Todas") }
+    var showLibrary by remember { mutableStateOf(false) }
+    var showPin by remember { mutableStateOf(false) }
+    val visibleRewards = when (category) {
+        "Todas" -> rewards.take(2)
+        "Brinquedos" -> rewards.filter { it.type == "CUSTOM" }
+        else -> rewards
+    }
     ChildBackdrop(child) {
         Column(Modifier.fillMaxSize().statusBarsPadding()) {
-            LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                item { BrandHeader(child) { viewModel.navigateTo(AppScreen.Home) } }
+            if (showLibrary) {
+                Row(Modifier.fillMaxWidth().padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Text("‹  Recompensas", color = TaskIdsColors.Blue, modifier = Modifier.clickable { showLibrary = false })
+                    Spacer(Modifier.weight(1f)); TaskIdsWordmark()
+                }
+                ParentLibraryContent(Modifier.weight(1f).padding(horizontal = 16.dp))
+            } else LazyColumn(Modifier.weight(1f), contentPadding = PaddingValues(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                item { Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { TaskIdsWordmark(Modifier.width(195.dp).height(52.dp)) } }
                 item {
-                    Text("Recompensas", color = navy, fontSize = 29.sp, fontWeight = FontWeight.Black)
-                    Text("Troque estrelas por momentos especiais.", color = muted, fontSize = 14.sp)
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text("Recompensas", color = navy, fontSize = 30.sp, fontWeight = FontWeight.Black, modifier = Modifier.weight(1f))
+                        Row(Modifier.background(Color(0xFFFFFBEA), CircleShape).border(1.dp, Color(0xFFFFE6A1), CircleShape).padding(horizontal = 11.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                            Image(painterResource(R.drawable.nav_star), null, Modifier.size(24.dp))
+                            Text(" ${child?.totalStars ?: 0}", color = navy, fontSize = 21.sp, fontWeight = FontWeight.Black)
+                        }
+                    }
+                }
+                item {
+                    Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf("Todas", "Brinquedos", "Atividades", "Prêmios").forEach { label ->
+                            val selected = category == label
+                            Text(label, color = if (selected) Color.White else muted, fontWeight = FontWeight.Bold, fontSize = 14.sp,
+                                modifier = Modifier.background(if (selected) TaskIdsColors.Blue else Color.White, CircleShape)
+                                    .clickable { category = label }.padding(horizontal = 16.dp, vertical = 11.dp))
+                        }
+                    }
                 }
                 if (!message.isNullOrBlank()) item { WhiteCard(Modifier.fillMaxWidth()) { Text(message ?: "", color = navy) } }
-                items(rewards, key = { it.id }) { reward ->
-                    val affordable = (child?.totalStars ?: 0) >= reward.costStars
-                    Row(Modifier.fillMaxWidth().background(Color.White, cardShape)
-                        .clickable(enabled = affordable) { viewModel.redeemReward(reward) }.padding(14.dp),
-                        verticalAlignment = Alignment.CenterVertically) {
-                        RewardArt(reward.type, Modifier.size(82.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Column(Modifier.weight(1f)) {
-                            Text(reward.title, color = navy, fontSize = 16.sp, fontWeight = FontWeight.Black, maxLines = 2)
-                            Text("★ ${reward.costStars} estrelas", color = TaskIdsColors.Orange, fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            Text(if (affordable) "Desbloquear" else "Junte mais estrelas", color = if (affordable) TaskIdsColors.Green else muted, fontSize = 12.sp)
+                if (category != "Atividades") {
+                    item { Text("Recompensas especiais", color = navy, fontSize = 22.sp, fontWeight = FontWeight.Black) }
+                    if (visibleRewards.isEmpty()) item { Text("Nenhum prêmio nesta categoria.", color = muted) }
+                    items(visibleRewards.chunked(2)) { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            row.forEach { reward ->
+                                val affordable = (child?.totalStars ?: 0) >= reward.costStars
+                                val colors = when (reward.type) {
+                                    "SCREEN_TIME" -> listOf(Color(0xFFFF76C5), Color(0xFFFFF09B))
+                                    "MOVIE" -> listOf(Color(0xFFED36EE), Color(0xFFF0C0FF))
+                                    else -> listOf(Color(0xFFB9E9FF), Color(0xFFE2CEFF))
+                                }
+                                Column(Modifier.weight(1f).shadow(7.dp, RoundedCornerShape(23.dp), spotColor = colors.last())
+                                    .background(Brush.verticalGradient(colors), RoundedCornerShape(23.dp))
+                                    .clickable { viewModel.redeemReward(reward) }.padding(12.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally) {
+                                    RewardArt(reward.type, Modifier.fillMaxWidth().height(130.dp))
+                                    Row(Modifier.fillMaxWidth().background(Color(0xFFFFF9D9), CircleShape).padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                                        Image(painterResource(R.drawable.nav_star), null, Modifier.size(23.dp))
+                                        Text(" ${reward.costStars} estrelas", color = Color(0xFFFF6C00), fontSize = 14.sp, fontWeight = FontWeight.Black)
+                                    }
+                                    Spacer(Modifier.height(9.dp))
+                                    Text(reward.title, color = navy, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Black,
+                                        textAlign = TextAlign.Center, minLines = 2, maxLines = 3)
+                                    Text(if (affordable) "Resgatar" else "Junte mais estrelas", color = navy.copy(alpha = 0.7f), fontSize = 10.sp)
+                                }
+                            }
+                            if (row.size == 1) Spacer(Modifier.weight(1f))
+                        }
+                    }
+                }
+                if (category == "Todas" || category == "Atividades") {
+                    item {
+                        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                            Text("Atividades e Downloads", color = navy, fontSize = 21.sp, fontWeight = FontWeight.Black, modifier = Modifier.weight(1f))
+                            Text("Ver todos", color = TaskIdsColors.Blue, fontSize = 13.sp, fontWeight = FontWeight.Bold, modifier = Modifier.clickable { showLibrary = true })
+                        }
+                    }
+                    items(listOf(
+                        listOf(Triple("Caça às cores", "TOYS", Color(0xFFFFF2B4)), Triple("Bingo da rotina", "HOMEWORK", Color(0xFFBDF6FF))),
+                        listOf(Triple("Cartas das emoções", "BOOK", Color(0xFFF9DDFF)), Triple("Alfabeto em movimento", "SPORT", Color(0xFFFFE9C5)))
+                    )) { row ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            row.forEach { (title, art, background) ->
+                                Column(Modifier.weight(1f).background(background, RoundedCornerShape(23.dp)).clickable { showLibrary = true }.padding(12.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Text(title, color = navy, fontSize = 17.sp, lineHeight = 20.sp, fontWeight = FontWeight.Black, textAlign = TextAlign.Center, minLines = 2)
+                                    Box(Modifier.fillMaxWidth().height(115.dp)) {
+                                        GameIcon(art, Modifier.fillMaxSize())
+                                        Text("PDF", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Black,
+                                            modifier = Modifier.align(Alignment.BottomEnd).background(Color(0xFFFF3348), RoundedCornerShape(8.dp)).padding(7.dp))
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
             ChildBottomBar("Recompensas", { viewModel.navigateTo(AppScreen.Home) },
-                { viewModel.navigateTo(AppScreen.Home) }, {}, { viewModel.navigateTo(AppScreen.Home) })
+                { viewModel.navigateTo(AppScreen.Home) }, { showLibrary = false }, { showPin = true })
+        }
+        if (showPin) ParentPinDialog(viewModel, { showPin = false }) {
+            showPin = false; viewModel.navigateTo(AppScreen.Parent)
         }
     }
 }
