@@ -105,22 +105,28 @@ adb logcat -d > real-screenshots/logcat.txt || true
 
 tap_text_optional "Wait"
 capture "01-home-game.png"
+adb shell input swipe 530 1450 530 600 400
+capture "01-home-details.png"
+adb shell input swipe 530 550 530 1550 400
+sleep 1
 
 tap_text "Missões" 10
 capture "01a-child-missions.png"
 tap_text "Início" 10
 tap_text "Recompensas" 10
 capture "01b-child-rewards.png"
+adb shell input swipe 530 1450 530 650 400
+capture "01c-child-downloads.png"
 tap_text "Início" 10
 
 tap_text "PAIS" 15
 sleep 2
 capture "02-parent-pin.png"
 
-tap_text "0" 10
-tap_text "0" 10
-tap_text "0" 10
-tap_text "0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
+tap_text "PIN 0" 10
 sleep 5
 tap_text_optional "Wait"
 capture "03-parent-dashboard.png"

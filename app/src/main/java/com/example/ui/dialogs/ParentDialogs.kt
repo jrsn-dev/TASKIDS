@@ -9,6 +9,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +36,7 @@ fun ParentPinDialog(
     var entered by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("Digite o PIN de 4 dígitos") }
 
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -86,6 +91,7 @@ fun ParentPinDialog(
                         Box(
                             modifier = Modifier
                                 .size(68.dp, 52.dp)
+                                .semantics { contentDescription = "PIN $key" }
                                 .background(TaskIdsColors.SoftBg, RoundedCornerShape(18.dp))
                                 .clickable {
                                     when (key) {
@@ -146,6 +152,7 @@ fun ParentPinDialog(
                 onClick = onDismiss
             )
         }
+    }
     }
 }
 
